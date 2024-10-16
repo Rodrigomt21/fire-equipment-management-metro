@@ -22,4 +22,8 @@ dev_dependencies:
   
 
 flutter:
+  assets:
+    - lib/imgs/fundoHub.png
+    - lib/imgs/telaCadastro.png
+    - lib/imgs/telaLogin.png
   uses-material-design: true
