@@ -1,0 +1,25 @@
+name: pi_metro
+description: Criação de uma aplicação multiplataforma que permita o controle e acompanhamento da situação de cada equipamento de combate a incêndio. Inclui funcionalidades como rastreabilidade dos equipamentos, monitoramento da data de validade e localização, registro de manutenções, emissão de relatórios e programação de trocas.
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.0.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  mysql_client: ^0.0.27
+  http: ^1.2.0
+  webview_flutter: ^3.0.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  
+
+flutter:
+  uses-material-design: true
