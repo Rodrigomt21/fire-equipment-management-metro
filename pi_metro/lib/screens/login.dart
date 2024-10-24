@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -76,38 +77,28 @@ class LoginPage extends StatelessWidget {
             ),
           ),
 
-          // Botão de Login transparente com hover
+          // Botão de Login estilizado
           Positioned(
             left: 930,   // Ajuste fino da posição X para centralizar nos campos da imagem
             top: 425,    // Ajuste fino da posição Y para o botão de login
-            child: MouseRegion(
-              onEnter: (event) {}, // Detecta quando o mouse entra no botão
-              onExit: (event) {},  // Detecta quando o mouse sai do botão
-              child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  bool isHovering = false;
-                  return MouseRegion(
-                    onEnter: (_) => setState(() => isHovering = true),
-                    onExit: (_) => setState(() => isHovering = false),
-                    child: SizedBox(
-                      width: 298,  // Largura do botão ajustada
-                      height: 50,  // Altura do botão ajustada
-                      child: TextButton(
-                        onPressed: () {},
-                        style: TextButton.styleFrom(
-                          backgroundColor: isHovering
-                              ? Colors.blue.withOpacity(0.2)  // Efeito hover azul claro
-                              : Colors.transparent,          // Transparente normalmente
-                          side: const BorderSide(color: Colors.transparent), // Sem borda
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero,  // Bordas quadradas
-                          ),
-                        ),
-                        child: const SizedBox.shrink(),  // Sem texto
-                      ),
-                    ),
-                  );
-                },
+            child: SizedBox(
+              width: 298,  // Largura do botão ajustada
+              height: 50,  // Altura do botão ajustada
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF001489), // Fundo azul
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),  // Bordas arredondadas
+                  ),
+                ),
+                child: Text(
+                  'Login',
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    color: Colors.white,  // Texto branco
+                  ),
+                ),
               ),
             ),
           ),

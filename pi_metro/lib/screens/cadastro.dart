@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CadastroPage extends StatelessWidget {
   const CadastroPage({super.key});
@@ -22,8 +23,8 @@ class CadastroPage extends StatelessWidget {
 
           // Campo de Email
           Positioned(
-            left: 930,  // Ajuste fino da posição X
-            top: 180,   // Ajuste fino da posição Y
+            left: 973,  // Ajuste fino da posição X
+            top: 198,   // Ajuste fino da posição Y
             child: SizedBox(
               width: 298,  // Largura do campo de email ajustada
               height: 50,  // Altura do campo de email ajustada
@@ -33,8 +34,8 @@ class CadastroPage extends StatelessWidget {
 
           // Campo de Senha
           Positioned(
-            left: 930,  // Ajuste fino da posição X
-            top: 312,   // Ajuste fino da posição Y
+            left: 973,  // Ajuste fino da posição X
+            top: 270,   // Ajuste fino da posição Y
             child: SizedBox(
               width: 298,  // Largura do campo de senha ajustada
               height: 50,  // Altura do campo de senha ajustada
@@ -44,8 +45,8 @@ class CadastroPage extends StatelessWidget {
 
           // Campo de Confirmação de Senha
           Positioned(
-            left: 930,  // Ajuste fino da posição X
-            top: 392,   // Ajuste fino da posição Y
+            left: 973,  // Ajuste fino da posição X
+            top: 335,   // Ajuste fino da posição Y
             child: SizedBox(
               width: 298,  // Largura do campo de confirmação de senha ajustada
               height: 50,  // Altura do campo de confirmação de senha ajustada
@@ -53,10 +54,10 @@ class CadastroPage extends StatelessWidget {
             ),
           ),
 
-          // Botão de Registrar
+          // Botão de Registrar estilizado
           Positioned(
-            left: 930,   // Ajuste fino da posição X
-            top: 472,    // Ajuste fino da posição Y
+            left: 973,   // Ajuste fino da posição X
+            top: 405,    // Ajuste fino da posição Y
             child: SizedBox(
               width: 298,  // Largura do botão ajustada
               height: 50,  // Altura do botão ajustada
@@ -68,11 +69,11 @@ class CadastroPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),  // Bordas arredondadas
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'Register',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     fontSize: 20,
-                    color: Colors.white,
+                    color: Colors.white,  // Texto branco
                   ),
                 ),
               ),

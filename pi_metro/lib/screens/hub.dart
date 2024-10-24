@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // Certifique-se de adicionar o pacote google_fonts ao pubspec.yaml
 
 class HubPage extends StatelessWidget {
   const HubPage({super.key});
@@ -20,78 +21,60 @@ class HubPage extends StatelessWidget {
             ),
           ),
 
-          // Botão de Login transparente e sem texto, com hover
+          // Botão de Login com bordas arredondadas e cor sólida
           Positioned(
             left: 310,  // Ajuste fino da posição X
             top: 585,   // Ajuste fino da posição Y
-            child: MouseRegion(
-              onEnter: (event) => {}, // Detecta quando o mouse entra no botão
-              onExit: (event) => {},  // Detecta quando o mouse sai do botão
-              child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  bool isHoveringLogin = false;
-                  return MouseRegion(
-                    onEnter: (_) => setState(() => isHoveringLogin = true),
-                    onExit: (_) => setState(() => isHoveringLogin = false),
-                    child: SizedBox(
-                      width: 300,  // Largura do botão de Login
-                      height: 50,  // Altura do botão de Login
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/login');
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: isHoveringLogin
-                              ? Colors.blue.withOpacity(0.2) // Efeito hover
-                              : Colors.transparent, // Botão transparente normalmente
-                          side: const BorderSide(color: Colors.transparent), // Sem borda
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero, // Bordas quadradas
-                          ),
-                        ),
-                        child: const SizedBox.shrink(), // Sem texto
-                      ),
-                    ),
-                  );
+            child: SizedBox(
+              width: 300,  // Largura do botão de Login
+              height: 50,  // Altura do botão de Login
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/login');
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF001489), // Cor sólida #001489
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10), // Bordas arredondadas
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
+                ),
+                child: Text(
+                  'Login',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white, // Cor do texto em branco
+                    fontSize: 18,        // Tamanho da fonte
+                  ),
+                ),
               ),
             ),
           ),
 
-          // Botão de Cadastro transparente e com hover
+          // Botão de Cadastro com bordas arredondadas e cor sólida
           Positioned(
             left: 930,  // Ajuste fino da posição X
             top: 585,   // Ajuste fino da posição Y
-            child: MouseRegion(
-              onEnter: (event) => {}, // Detecta quando o mouse entra no botão
-              onExit: (event) => {},  // Detecta quando o mouse sai do botão
-              child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  bool isHoveringCadastro = false;
-                  return MouseRegion(
-                    onEnter: (_) => setState(() => isHoveringCadastro = true),
-                    onExit: (_) => setState(() => isHoveringCadastro = false),
-                    child: SizedBox(
-                      width: 300,  // Largura do botão de Cadastro
-                      height: 50,  // Altura do botão de Cadastro
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/cadastro');
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: isHoveringCadastro
-                              ? Colors.green.withOpacity(0.2) // Efeito hover
-                              : Colors.transparent, // Botão transparente normalmente
-                          side: const BorderSide(color: Colors.transparent), // Sem borda
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero, // Bordas quadradas
-                          ),
-                        ),
-                        child: const SizedBox.shrink(), // Sem texto
-                      ),
-                    ),
-                  );
+            child: SizedBox(
+              width: 300,  // Largura do botão de Cadastro
+              height: 50,  // Altura do botão de Cadastro
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/cadastro');
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF001489), // Cor sólida #001489
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10), // Bordas arredondadas
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
+                ),
+                child: Text(
+                  'Cadastro',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white, // Cor do texto em branco
+                    fontSize: 18,        // Tamanho da fonte
+                  ),
+                ),
               ),
             ),
           ),
