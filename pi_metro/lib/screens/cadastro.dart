@@ -10,87 +10,72 @@ class CadastroPage extends StatelessWidget {
         children: [
           // Imagem de fundo ajustada automaticamente
           Container(
-            width: double.infinity,  // Ocupa toda a largura da tela
-            height: double.infinity, // Ocupa toda a altura da tela
+            width: double.infinity,
+            height: double.infinity,
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('lib/imgs/telaCadastro.png'), // Caminho da imagem de fundo
-                fit: BoxFit.cover,  // Ajusta a imagem automaticamente para cobrir a tela
+                fit: BoxFit.cover,
               ),
             ),
           ),
-          // Conteúdo sobreposto
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                // Seção da esquerda com o texto
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Cadastro',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Crie sua conta e faça parte do time! \nComece a gerenciar seus equipamentos com eficiência e facilidade',
-                        style: TextStyle(fontSize: 18, color: Colors.black),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'If you already have an account\nYou can ',
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/login');
-                        },
-                        child: const Text(
-                          'Login here!',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ],
+
+          // Campo de Email
+          Positioned(
+            left: 930,  // Ajuste fino da posição X
+            top: 180,   // Ajuste fino da posição Y
+            child: SizedBox(
+              width: 298,  // Largura do campo de email ajustada
+              height: 50,  // Altura do campo de email ajustada
+              child: _buildTextField('Enter Email'),
+            ),
+          ),
+
+          // Campo de Senha
+          Positioned(
+            left: 930,  // Ajuste fino da posição X
+            top: 312,   // Ajuste fino da posição Y
+            child: SizedBox(
+              width: 298,  // Largura do campo de senha ajustada
+              height: 50,  // Altura do campo de senha ajustada
+              child: _buildTextField('Password', isPassword: true),
+            ),
+          ),
+
+          // Campo de Confirmação de Senha
+          Positioned(
+            left: 930,  // Ajuste fino da posição X
+            top: 392,   // Ajuste fino da posição Y
+            child: SizedBox(
+              width: 298,  // Largura do campo de confirmação de senha ajustada
+              height: 50,  // Altura do campo de confirmação de senha ajustada
+              child: _buildTextField('Confirm Password', isPassword: true),
+            ),
+          ),
+
+          // Botão de Registrar
+          Positioned(
+            left: 930,   // Ajuste fino da posição X
+            top: 472,    // Ajuste fino da posição Y
+            child: SizedBox(
+              width: 298,  // Largura do botão ajustada
+              height: 50,  // Altura do botão ajustada
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF001489), // Azul Metrô
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),  // Bordas arredondadas
                   ),
                 ),
-                // Seção da direita com o formulário
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildTextField('Enter Email'),
-                      const SizedBox(height: 10),
-                      _buildTextField('Create User name'),
-                      const SizedBox(height: 10),
-                      _buildTextField('Contact number'),
-                      const SizedBox(height: 10),
-                      _buildTextField('Password', isPassword: true),
-                      const SizedBox(height: 10),
-                      _buildTextField('Confirm Password', isPassword: true),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF001489), // Azul Metrô
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 15),
-                        ),
-                        child: const Text('Register'),
-                      ),
-                    ],
+                child: const Text(
+                  'Register',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ],
@@ -98,14 +83,34 @@ class CadastroPage extends StatelessWidget {
     );
   }
 
-  // Função para criar os campos de entrada de texto
+  // Função que cria os campos de texto
   Widget _buildTextField(String hint, {bool isPassword = false}) {
     return TextField(
-      obscureText: isPassword,
+      obscureText: isPassword,  // Controla visibilidade da senha
       decoration: InputDecoration(
-        hintText: hint,
-        border: const OutlineInputBorder(),
-        suffixIcon: isPassword ? const Icon(Icons.visibility_off) : null,
+        filled: true,
+        fillColor: Colors.grey[200],  // Cor de fundo cinza claro
+        hintText: hint,  // Placeholder atualizado
+        hintStyle: const TextStyle(
+          color: Colors.black54, 
+          fontSize: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),  // Bordas arredondadas modernas
+          borderSide: BorderSide.none,  // Sem borda visível
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: const Icon(
+                  Icons.visibility_off,
+                  color: Colors.black54,
+                ),
+                onPressed: () {
+                  // Alterna entre mostrar e esconder senha
+                },
+              )
+            : null,  // O ícone de visibilidade aparece apenas no campo de senha
       ),
     );
   }

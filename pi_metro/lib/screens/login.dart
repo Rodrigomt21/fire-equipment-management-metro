@@ -20,7 +20,7 @@ class LoginPage extends StatelessWidget {
             ),
           ),
 
-          // Botão colorido com posição ajustável
+          // Botão de registro transparente e sem texto
           Positioned(
             left: 315,   // Ajuste fino da posição X
             top: 405,    // Ajuste fino da posição Y
@@ -32,18 +32,14 @@ class LoginPage extends StatelessWidget {
                   Navigator.pushNamed(context, '/cadastro'); // Redireciona para a aba de cadastro
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,  // Cor do botão
+                  backgroundColor: Colors.transparent,  // Botão transparente
+                  shadowColor: Colors.transparent,      // Sem sombra
+                  padding: EdgeInsets.zero,             // Sem padding
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),  // Bordas arredondadas
                   ),
                 ),
-                child: const Text(
-                  'Registrar',
-                  style: TextStyle(
-                    color: Colors.white,  // Cor do texto
-                    fontSize: 18,        // Tamanho da fonte
-                  ),
-                ),
+                child: const SizedBox.shrink(),  // Sem conteúdo visível
               ),
             ),
           ),
