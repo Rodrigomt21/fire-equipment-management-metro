@@ -5,66 +5,93 @@ class HubPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Pegando o tamanho da tela com MediaQuery
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       body: Stack(
         children: [
           // Imagem de fundo ajustada automaticamente
           Container(
-            width: double.infinity,  // Ocupa toda a largura da tela
-            height: double.infinity, // Ocupa toda a altura da tela
+            width: double.infinity,
+            height: double.infinity,
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('lib/imgs/fundoHub.png'), // Caminho da imagem de fundo
-                fit: BoxFit.cover,  // Ajusta a imagem automaticamente para cobrir a tela
+                fit: BoxFit.cover,
               ),
             ),
           ),
 
-          // Botão de Login transparente sobre a imagem de fundo
+          // Botão de Login transparente e sem texto, com hover
           Positioned(
-            top: 590, // Ajuste a posição vertical do botão de Login
-            left: (screenWidth / 2) - 100, // Ajusta horizontalmente o botão de login (assumindo largura de 200px)
-            child: TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/login');
-              },
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                backgroundColor: Colors.transparent, // Botão transparente
-                side: const BorderSide(color: Colors.black, width: 2), // Borda preta
-              ),
-              child: const Text(
-                'Login',
-                style: TextStyle(
-                  color: Colors.white, // Cor do texto
-                  fontSize: 20, // Tamanho do texto
-                ),
+            left: 310,  // Ajuste fino da posição X
+            top: 585,   // Ajuste fino da posição Y
+            child: MouseRegion(
+              onEnter: (event) => {}, // Detecta quando o mouse entra no botão
+              onExit: (event) => {},  // Detecta quando o mouse sai do botão
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  bool isHoveringLogin = false;
+                  return MouseRegion(
+                    onEnter: (_) => setState(() => isHoveringLogin = true),
+                    onExit: (_) => setState(() => isHoveringLogin = false),
+                    child: SizedBox(
+                      width: 300,  // Largura do botão de Login
+                      height: 50,  // Altura do botão de Login
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/login');
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: isHoveringLogin
+                              ? Colors.blue.withOpacity(0.2) // Efeito hover
+                              : Colors.transparent, // Botão transparente normalmente
+                          side: const BorderSide(color: Colors.transparent), // Sem borda
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero, // Bordas quadradas
+                          ),
+                        ),
+                        child: const SizedBox.shrink(), // Sem texto
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
 
-          // Botão de Cadastro transparente sobre a imagem de fundo
+          // Botão de Cadastro transparente e com hover
           Positioned(
-            top: 650, // Ajuste a posição vertical do botão de Cadastro
-            left: (screenWidth / 2) - 100, // Ajusta horizontalmente o botão de cadastro (assumindo largura de 200px)
-            child: TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/cadastro');
-              },
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                backgroundColor: Colors.transparent, // Botão transparente
-                side: const BorderSide(color: Colors.black, width: 2), // Borda preta
-              ),
-              child: const Text(
-                'Cadastro',
-                style: TextStyle(
-                  color: Colors.white, // Cor do texto
-                  fontSize: 20, // Tamanho do texto
-                ),
+            left: 930,  // Ajuste fino da posição X
+            top: 585,   // Ajuste fino da posição Y
+            child: MouseRegion(
+              onEnter: (event) => {}, // Detecta quando o mouse entra no botão
+              onExit: (event) => {},  // Detecta quando o mouse sai do botão
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  bool isHoveringCadastro = false;
+                  return MouseRegion(
+                    onEnter: (_) => setState(() => isHoveringCadastro = true),
+                    onExit: (_) => setState(() => isHoveringCadastro = false),
+                    child: SizedBox(
+                      width: 300,  // Largura do botão de Cadastro
+                      height: 50,  // Altura do botão de Cadastro
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/cadastro');
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: isHoveringCadastro
+                              ? Colors.green.withOpacity(0.2) // Efeito hover
+                              : Colors.transparent, // Botão transparente normalmente
+                          side: const BorderSide(color: Colors.transparent), // Sem borda
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero, // Bordas quadradas
+                          ),
+                        ),
+                        child: const SizedBox.shrink(), // Sem texto
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),

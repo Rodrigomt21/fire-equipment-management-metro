@@ -8,12 +8,14 @@ class CadastroPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Imagem de fundo
+          // Imagem de fundo ajustada automaticamente
           Container(
+            width: double.infinity,  // Ocupa toda a largura da tela
+            height: double.infinity, // Ocupa toda a altura da tela
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('lib/imgs/telaCadastro.png'), 
-                fit: BoxFit.cover,
+                image: AssetImage('lib/imgs/telaCadastro.png'), // Caminho da imagem de fundo
+                fit: BoxFit.cover,  // Ajusta a imagem automaticamente para cobrir a tela
               ),
             ),
           ),
