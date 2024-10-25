@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false, 
       title: 'Gestão de Equipamentos',
       theme: ThemeData(
         primaryColor: const Color(0xFF001489), // Azul Metrô
