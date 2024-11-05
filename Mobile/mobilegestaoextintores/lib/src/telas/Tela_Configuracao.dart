@@ -1,5 +1,6 @@
 import 'package:mobilegestaoextintores/src/telas/Tela_Login.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'tela_conta.dart'; 
 
 class TelaConfiguracao extends StatelessWidget {
@@ -21,7 +22,6 @@ class TelaConfiguracao extends StatelessWidget {
               icon: Icons.account_circle,
               label: 'Conta',
               onTap: () {
-                // Navegar para a tela de Conta
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => TelaConta()));
               },
@@ -32,7 +32,7 @@ class TelaConfiguracao extends StatelessWidget {
               label: 'Privacidade',
               onTap: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => TelaPrivacidade()));
+                    MaterialPageRoute(builder: (context) => TelaConta()));
               },
             ),
             _buildConfigOption(
@@ -41,7 +41,7 @@ class TelaConfiguracao extends StatelessWidget {
               label: 'Tela',
               onTap: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => TelaConfigTela()));
+                    MaterialPageRoute(builder: (context) => TelaConta()));
               },
             ),
             _buildConfigOption(
@@ -52,7 +52,7 @@ class TelaConfiguracao extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => TelaReportarErro()));
+                        builder: (context) => TelaConta()));
               },
             ),
             const Divider(),
@@ -66,7 +66,19 @@ class TelaConfiguracao extends StatelessWidget {
               isLogout: true,
             ),
             const Spacer(),
-            Image.network('https://i.imgur.com/IZ8lRQK.png', width: 80),
+            Opacity(
+              opacity: 0.2, 
+              child: Center(
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.5, 
+                  height: MediaQuery.of(context).size.height * 0.1, 
+                  child: Image.asset(
+                    'assets/images/logo.jpeg',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -142,7 +154,12 @@ class TelaConfiguracao extends StatelessWidget {
               child: const Text('Cancelar'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                // Limpar informações da sessão usando shared_preferences
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.clear(); // Limpa todas as informações da sessão
+
+                // Fecha o diálogo e navega para a tela de login
                 Navigator.pop(context);
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => const TelaLogin()));
@@ -152,43 +169,6 @@ class TelaConfiguracao extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-
-class TelaPrivacidade extends StatelessWidget {
-  const TelaPrivacidade({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Privacidade')),
-      body: const Center(child: Text('Tela de Privacidade')),
-    );
-  }
-}
-
-class TelaConfigTela extends StatelessWidget {
-  const TelaConfigTela({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Tela')),
-      body: const Center(child: Text('Tela de Configuração da Tela')),
-    );
-  }
-}
-
-class TelaReportarErro extends StatelessWidget {
-  const TelaReportarErro({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Reportar Erro')),
-      body: const Center(child: Text('Tela de Reportar Erro')),
     );
   }
 }
