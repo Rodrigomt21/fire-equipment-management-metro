@@ -6,99 +6,131 @@ class CadastroPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      body: Stack(
-        children: [
-          // Imagem de fundo ajustada automaticamente
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('lib/imgs/telaCadastro.png'), // Caminho da imagem de fundo
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isSmallScreen = constraints.maxWidth < 600;
 
-          // Campo de Email
-          Positioned(
-            left: 973,  // Ajuste fino da posição X
-            top: 198,   // Ajuste fino da posição Y
-            child: SizedBox(
-              width: 298,  // Largura do campo de email ajustada
-              height: 50,  // Altura do campo de email ajustada
-              child: _buildTextField('Enter Email'),
-            ),
-          ),
-
-          // Campo de Senha
-          Positioned(
-            left: 973,  // Ajuste fino da posição X
-            top: 270,   // Ajuste fino da posição Y
-            child: SizedBox(
-              width: 298,  // Largura do campo de senha ajustada
-              height: 50,  // Altura do campo de senha ajustada
-              child: _buildTextField('Password', isPassword: true),
-            ),
-          ),
-
-          // Campo de Confirmação de Senha
-          Positioned(
-            left: 973,  // Ajuste fino da posição X
-            top: 335,   // Ajuste fino da posição Y
-            child: SizedBox(
-              width: 298,  // Largura do campo de confirmação de senha ajustada
-              height: 50,  // Altura do campo de confirmação de senha ajustada
-              child: _buildTextField('Confirm Password', isPassword: true),
-            ),
-          ),
-
-          // Botão de Registrar estilizado
-          Positioned(
-            left: 973,   // Ajuste fino da posição X
-            top: 405,    // Ajuste fino da posição Y
-            child: SizedBox(
-              width: 298,  // Largura do botão ajustada
-              height: 50,  // Altura do botão ajustada
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF001489), // Azul Metrô
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),  // Bordas arredondadas
-                  ),
-                ),
-                child: Text(
-                  'Register',
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    color: Colors.white,  // Texto branco
+          return Stack(
+            children: [
+              // Imagem de fundo ajustada ao tamanho da tela
+              Container(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('lib/imgs/telaCadastro.png'),
+                    fit: BoxFit.cover, // Garante que a imagem cubra toda a tela
                   ),
                 ),
               ),
-            ),
-          ),
-        ],
+
+              // Campo de Email
+              Positioned(
+                left: isSmallScreen ? screenWidth * 0.1 : 973,
+                top: screenHeight * 0.3,
+                child: SizedBox(
+                  width: isSmallScreen ? screenWidth * 0.8 : 298,
+                  height: 50,
+                  child: _buildTextField('Enter Email'),
+                ),
+              ),
+
+              // Campo de Senha
+              Positioned(
+                left: isSmallScreen ? screenWidth * 0.1 : 973,
+                top: screenHeight * 0.4,
+                child: SizedBox(
+                  width: isSmallScreen ? screenWidth * 0.8 : 298,
+                  height: 50,
+                  child: _buildTextField('Password', isPassword: true),
+                ),
+              ),
+
+              // Campo de Confirmação de Senha
+              Positioned(
+                left: isSmallScreen ? screenWidth * 0.1 : 973,
+                top: screenHeight * 0.5,
+                child: SizedBox(
+                  width: isSmallScreen ? screenWidth * 0.8 : 298,
+                  height: 50,
+                  child: _buildTextField('Confirm Password', isPassword: true),
+                ),
+              ),
+
+              // Botão de Registrar estilizado
+              Positioned(
+                left: isSmallScreen ? screenWidth * 0.1 : 973,
+                top: screenHeight * 0.6,
+                child: SizedBox(
+                  width: isSmallScreen ? screenWidth * 0.8 : 298,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF001489),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      'Register',
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Botão de login transparente e sem texto
+              Positioned(
+                left: isSmallScreen ? screenWidth * 0.7 : 315,
+                top: screenHeight * 0.6,
+                child: SizedBox(
+                  width: 100,
+                  height: 15,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/login');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  // Função que cria os campos de texto
   Widget _buildTextField(String hint, {bool isPassword = false}) {
     return TextField(
-      obscureText: isPassword,  // Controla visibilidade da senha
+      obscureText: isPassword,
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.grey[200],  // Cor de fundo cinza claro
-        hintText: hint,  // Placeholder atualizado
+        fillColor: Colors.grey[200],
+        hintText: hint,
         hintStyle: const TextStyle(
           color: Colors.black54, 
           fontSize: 16,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),  // Bordas arredondadas modernas
-          borderSide: BorderSide.none,  // Sem borda visível
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         suffixIcon: isPassword
@@ -107,11 +139,9 @@ class CadastroPage extends StatelessWidget {
                   Icons.visibility_off,
                   color: Colors.black54,
                 ),
-                onPressed: () {
-                  // Alterna entre mostrar e esconder senha
-                },
+                onPressed: () {},
               )
-            : null,  // O ícone de visibilidade aparece apenas no campo de senha
+            : null,
       ),
     );
   }

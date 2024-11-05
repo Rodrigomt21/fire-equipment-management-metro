@@ -6,122 +6,130 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      body: Stack(
-        children: [
-          // Imagem de fundo ajustada automaticamente
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('lib/imgs/telaLogin.png'), // Caminho da imagem de fundo
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isSmallScreen = constraints.maxWidth < 600;
 
-          // Botão de registro transparente e sem texto
-          Positioned(
-            left: 315,   // Ajuste fino da posição X
-            top: 405,    // Ajuste fino da posição Y
-            child: SizedBox(
-              width: 100,  // Largura do botão
-              height: 15,  // Altura do botão
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/cadastro'); // Redireciona para a aba de cadastro
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,  // Botão transparente
-                  shadowColor: Colors.transparent,      // Sem sombra
-                  padding: EdgeInsets.zero,             // Sem padding
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),  // Bordas arredondadas
-                  ),
-                ),
-                child: const SizedBox.shrink(),  // Sem conteúdo visível
-              ),
-            ),
-          ),
-
-          // Campo de Login
-          Positioned(
-            left: 930,  // Ajuste fino da posição X para centralizar nos campos da imagem
-            top: 232,   // Ajuste fino da posição Y para o campo de Login
-            child: SizedBox(
-              width: 298,  // Largura do campo de login ajustada
-              height: 50,  // Altura do campo de login ajustada
-              child: _buildTextField('Email ou usuário'),
-            ),
-          ),
-
-          // Campo de Senha
-          Positioned(
-            left: 930,  // Ajuste fino da posição X para centralizar nos campos da imagem
-            top: 312,   // Ajuste fino da posição Y para o campo de senha
-            child: SizedBox(
-              width: 298,  // Largura do campo de senha ajustada
-              height: 50,  // Altura do campo de senha ajustada
-              child: _buildTextField('Digite sua senha', isPassword: true),
-            ),
-          ),
-
-          // Link "Esqueceu a senha?"
-          Positioned(
-            left: 1150,  // Ajuste da posição X para alinhar à direita do campo de senha
-            top: 375,    // Ajuste da posição Y para logo abaixo do campo de senha
-            child: const Text(
-              'Esqueceu a senha?',
-              style: TextStyle(color: Colors.black),
-            ),
-          ),
-
-          // Botão de Login estilizado
-          Positioned(
-            left: 930,   // Ajuste fino da posição X para centralizar nos campos da imagem
-            top: 425,    // Ajuste fino da posição Y para o botão de login
-            child: SizedBox(
-              width: 298,  // Largura do botão ajustada
-              height: 50,  // Altura do botão ajustada
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF001489), // Fundo azul
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),  // Bordas arredondadas
-                  ),
-                ),
-                child: Text(
-                  'Login',
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    color: Colors.white,  // Texto branco
+          return Stack(
+            children: [
+              // Imagem de fundo ajustada ao tamanho da tela
+              Container(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('lib/imgs/telaLogin.png'),
+                    fit: BoxFit.cover, // Garante que a imagem cubra toda a tela
                   ),
                 ),
               ),
-            ),
-          ),
-        ],
+
+              // Botão de registro transparente e sem texto
+              Positioned(
+                left: isSmallScreen ? screenWidth * 0.7 : 315,
+                top: screenHeight * 0.5,
+                child: SizedBox(
+                  width: 100,
+                  height: 15,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/cadastro');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+
+              // Campo de Login
+              Positioned(
+                left: isSmallScreen ? screenWidth * 0.1 : 930,
+                top: screenHeight * 0.3,
+                child: SizedBox(
+                  width: isSmallScreen ? screenWidth * 0.8 : 298,
+                  height: 50,
+                  child: _buildTextField('Email ou usuário'),
+                ),
+              ),
+
+              // Campo de Senha
+              Positioned(
+                left: isSmallScreen ? screenWidth * 0.1 : 930,
+                top: screenHeight * 0.4,
+                child: SizedBox(
+                  width: isSmallScreen ? screenWidth * 0.8 : 298,
+                  height: 50,
+                  child: _buildTextField('Digite sua senha', isPassword: true),
+                ),
+              ),
+
+              // Link "Esqueceu a senha?"
+              Positioned(
+                left: isSmallScreen ? screenWidth * 0.6 : 1150,
+                top: screenHeight * 0.45,
+                child: const Text(
+                  'Esqueceu a senha?',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+
+              // Botão de Login estilizado
+              Positioned(
+                left: isSmallScreen ? screenWidth * 0.1 : 930,
+                top: screenHeight * 0.5,
+                child: SizedBox(
+                  width: isSmallScreen ? screenWidth * 0.8 : 298,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF001489),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      'Login',
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  // Função que cria os campos de texto
   Widget _buildTextField(String hint, {bool isPassword = false}) {
     return TextField(
-      obscureText: isPassword ? true : false,  // Controla visibilidade da senha
+      obscureText: isPassword,
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.grey[200],  // Cor de fundo cinza claro
-        hintText: hint,  // Placeholder atualizado e mais curto
+        fillColor: Colors.grey[200],
+        hintText: hint,
         hintStyle: const TextStyle(
           color: Colors.black54, 
           fontSize: 16,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),  // Bordas arredondadas modernas
-          borderSide: BorderSide.none,  // Sem borda visível
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         suffixIcon: isPassword
@@ -130,11 +138,9 @@ class LoginPage extends StatelessWidget {
                   Icons.visibility_off,
                   color: Colors.black54,
                 ),
-                onPressed: () {
-                  // Alterna entre mostrar e esconder senha
-                },
+                onPressed: () {},
               )
-            : null,  // O ícone de visibilidade aparece apenas no campo de senha
+            : null,
       ),
     );
   }
