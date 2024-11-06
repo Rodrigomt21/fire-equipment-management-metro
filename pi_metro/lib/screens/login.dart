@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '/services/auth_services.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +39,8 @@ class LoginPage extends StatelessWidget {
 
               // Botão de registro transparente e sem texto
               Positioned(
-                left: 310, // Ajuste da posição horizontal para 305 na proporção da tela
-                top: 405, // Ajuste da posição vertical para 405 na proporção da tela
+                left: 310, // Ajuste da posição horizontal
+                top: 405, // Ajuste da posição vertical
                 child: SizedBox(
                   width: 90,
                   height: 15,
@@ -59,7 +68,7 @@ class LoginPage extends StatelessWidget {
                 child: SizedBox(
                   width: isSmallScreen ? screenWidth * 0.8 : 298,
                   height: 50,
-                  child: _buildTextField('Email ou usuário'),
+                  child: _buildTextField('Email ou usuário', emailController),
                 ),
               ),
 
@@ -70,13 +79,13 @@ class LoginPage extends StatelessWidget {
                 child: SizedBox(
                   width: isSmallScreen ? screenWidth * 0.8 : 298,
                   height: 50,
-                  child: _buildTextField('Digite sua senha', isPassword: true),
+                  child: _buildTextField('Digite sua senha', passwordController, isPassword: true),
                 ),
               ),
 
               // Link "Esqueceu a senha?"
               Positioned(
-                left: 1025,
+                left: 1111,
                 top: 340,
                 child: const Text(
                   'Esqueceu a senha?',
@@ -92,7 +101,20 @@ class LoginPage extends StatelessWidget {
                   width: isSmallScreen ? screenWidth * 0.8 : 298,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      bool success = await AuthService().loginUser(
+                          emailController.text, passwordController.text);
+                      if (success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Login bem-sucedido'))
+                        );
+                        Navigator.pushNamed(context, '/home'); // Redirect to home screen on success
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Credenciais inválidas'))
+                        );
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF001489),
                       shape: RoundedRectangleBorder(
@@ -116,8 +138,9 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(String hint, {bool isPassword = false}) {
+  Widget _buildTextField(String hint, TextEditingController controller, {bool isPassword = false}) {
     return TextField(
+      controller: controller,
       obscureText: isPassword,
       decoration: InputDecoration(
         filled: true,
@@ -138,7 +161,7 @@ class LoginPage extends StatelessWidget {
                   Icons.visibility_off,
                   color: Colors.black54,
                 ),
-                onPressed: () {},
+                onPressed: () {}, // Para implementar exibição de senha
               )
             : null,
       ),

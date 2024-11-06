@@ -19,6 +19,7 @@ dev_dependencies:
   google_fonts: ^6.2.1
   flutter_test:
     sdk: flutter
+  http: ^1.2.2
   flutter_lints: ^4.0.0
   
 
