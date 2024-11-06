@@ -30,10 +30,10 @@ class LoginPage extends StatelessWidget {
 
               // Botão de registro transparente e sem texto
               Positioned(
-                left: isSmallScreen ? screenWidth * 0.7 : 315,
-                top: screenHeight * 0.5,
+                left: 310, // Ajuste da posição horizontal para 305 na proporção da tela
+                top: 405, // Ajuste da posição vertical para 405 na proporção da tela
                 child: SizedBox(
-                  width: 100,
+                  width: 90,
                   height: 15,
                   child: ElevatedButton(
                     onPressed: () {
@@ -76,8 +76,8 @@ class LoginPage extends StatelessWidget {
 
               // Link "Esqueceu a senha?"
               Positioned(
-                left: isSmallScreen ? screenWidth * 0.6 : 1150,
-                top: screenHeight * 0.45,
+                left: 1025,
+                top: 340,
                 child: const Text(
                   'Esqueceu a senha?',
                   style: TextStyle(color: Colors.black),
