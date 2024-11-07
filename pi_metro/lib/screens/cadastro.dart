@@ -11,6 +11,7 @@ class CadastroPage extends StatefulWidget {
 }
 
 class _CadastroPageState extends State<CadastroPage> {
+  final TextEditingController nomeCompletoController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
@@ -34,9 +35,10 @@ class _CadastroPageState extends State<CadastroPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildTextField('Enter Email', emailController),
-                _buildTextField('Password', passwordController, isPassword: true),
-                _buildTextField('Confirm Password', confirmPasswordController, isPassword: true),
+                _buildTextField('Nome e Sobrenome', nomeCompletoController),
+                _buildTextField('Email', emailController),
+                _buildTextField('Senha', passwordController, isPassword: true),
+                _buildTextField('Confirmar Senha', confirmPasswordController, isPassword: true),
                 if (errorMessage != null)
                   Text(
                     errorMessage!,
@@ -52,7 +54,7 @@ class _CadastroPageState extends State<CadastroPage> {
                     ),
                   ),
                   child: Text(
-                    'Register',
+                    'Registrar',
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       color: Colors.white,
@@ -94,30 +96,39 @@ class _CadastroPageState extends State<CadastroPage> {
     );
   }
 
+  // Função para transformar cada palavra do nome completo com a primeira letra maiúscula
+  String capitalizeName(String name) {
+    return name.split(' ').map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase()).join(' ');
+  }
+
   void _register() async {
-    print('Tentando registrar o usuário...');  // Log inicial
+    print('Tentando registrar o usuário...');
 
     setState(() {
       errorMessage = null;
     });
 
-    // Removendo espaços ao redor do email
+    // Ajustar nome para que cada palavra comece com letra maiúscula
+    final nomeCompleto = capitalizeName(nomeCompletoController.text.trim());
     final email = emailController.text.trim();
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
 
-    // Validação de email com logs adicionais
-    print('Validando email: $email');
-    bool isValid = EmailValidator.validate(email);
-    print('Resultado da validação: $isValid');
-    
-    if (!isValid) {
+    if (nomeCompleto.isEmpty) {
+      if (mounted) {
+        setState(() {
+          errorMessage = 'Por favor, insira seu nome completo.';
+        });
+      }
+      return;
+    }
+
+    if (!EmailValidator.validate(email)) {
       if (mounted) {
         setState(() {
           errorMessage = 'Por favor, insira um email válido.';
         });
       }
-      print('Email inválido');
       return;
     }
 
@@ -127,7 +138,6 @@ class _CadastroPageState extends State<CadastroPage> {
           errorMessage = 'As senhas não coincidem!';
         });
       }
-      print('Senhas não coincidem');
       return;
     }
 
@@ -137,12 +147,11 @@ class _CadastroPageState extends State<CadastroPage> {
           errorMessage = 'A senha deve conter ao menos 6 caracteres, uma letra maiúscula e um caractere especial.';
         });
       }
-      print('Senha não atende aos requisitos');
       return;
     }
 
     try {
-      await AuthService().registra(email, password);
+      await AuthService().registra(nomeCompleto, email, password);
       print('Registro realizado com sucesso');
       if (mounted) {
         Navigator.pushNamed(context, '/welcome');
@@ -156,7 +165,7 @@ class _CadastroPageState extends State<CadastroPage> {
           errorMessage = 'Erro ao registrar usuário. Tente novamente.';
         });
       }
-      print('Erro ao registrar usuário: $e');  // Log do erro em caso de falha
+      print('Erro ao registrar usuário: $e');
     }
   }
 

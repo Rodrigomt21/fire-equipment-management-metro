@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'screens/hub.dart'; 
-import 'screens/login.dart'; 
-import 'screens/cadastro.dart'; 
-import 'screens/welcome.dart'; // Certifique-se de criar esta página ou de ajustar o nome conforme necessário
+import 'screens/hub.dart';
+import 'screens/login.dart'; // Certifique-se de que este caminho está correto
+import 'screens/cadastro.dart';
+import 'screens/ResetPasswordPage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,17 +14,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, 
+      debugShowCheckedModeBanner: false,
       title: 'Gestão de Equipamentos',
       theme: ThemeData(
-        primaryColor: const Color(0xFF001489), // Azul Metrô
+        primaryColor: const Color(0xFF001489),
       ),
-      initialRoute: '/', // Tela inicial será o Hub
+      initialRoute: '/',
       routes: {
-        '/': (context) => const HubPage(), // Rota do Hub
-        '/login': (context) => const LoginPage(), // Rota para Login
-        '/cadastro': (context) => const CadastroPage(), // Rota para Cadastro
-        '/welcome': (context) => const WelcomePage(), // Rota para a página de boas-vindas
+        '/': (context) => const HubPage(),
+        '/login': (context) => const LoginPage(), // Referência correta para LoginPage
+        '/cadastro': (context) => const CadastroPage(),
+        '/reset-password': (context) => ResetPasswordPage(token: ''),
       },
     );
   }
