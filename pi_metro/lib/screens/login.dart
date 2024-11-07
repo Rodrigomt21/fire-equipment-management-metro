@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:email_validator/email_validator.dart';
@@ -29,7 +28,6 @@ class _LoginPageState extends State<LoginPage> {
 
           return Stack(
             children: [
-              // Background image
               Container(
                 width: constraints.maxWidth,
                 height: constraints.maxHeight,
@@ -40,7 +38,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              // Login fields and buttons
               Positioned(
                 left: isSmallScreen ? screenWidth * 0.1 : 930,
                 top: screenHeight * 0.3,
@@ -114,41 +111,40 @@ class _LoginPageState extends State<LoginPage> {
       errorMessage = null;
     });
 
-    final email = emailController.text;
+    // Removendo espaços ao redor do email
+    final email = emailController.text.trim();
     final password = passwordController.text;
 
+    // Validação de email
     if (!EmailValidator.validate(email)) {
-      setState(() {
-        errorMessage = 'Por favor, insira um email válido.';
-      });
-      return;
-    }
-
-    if (!_isPasswordValid(password)) {
-      setState(() {
-        errorMessage = 'A senha deve conter ao menos 6 caracteres, uma letra maiúscula e um caractere especial.';
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = 'Por favor, insira um email válido.';
+        });
+      }
       return;
     }
 
     try {
       bool success = await AuthService().loginUser(email, password);
-      if (success) {
-        Navigator.pushNamed(context, '/welcome');
-      } else {
-        setState(() {
-          errorMessage = 'Credenciais inválidas.';
-        });
+      if (mounted) {
+        if (success) {
+          Navigator.pushNamed(context, '/welcome');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login realizado com sucesso!')),
+          );
+        } else {
+          setState(() {
+            errorMessage = 'Credenciais inválidas.';
+          });
+        }
       }
     } catch (e) {
-      setState(() {
-        errorMessage = 'Erro de comunicação. Tente novamente.';
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = 'Erro de comunicação. Tente novamente.';
+        });
+      }
     }
-  }
-
-  bool _isPasswordValid(String password) {
-    final regex = RegExp(r'^(?=.*?[A-Z])(?=.*?[!@#\$&*~]).{6,}$');
-    return regex.hasMatch(password);
   }
 }

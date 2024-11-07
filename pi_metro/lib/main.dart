@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/hub.dart'; 
 import 'screens/login.dart'; 
 import 'screens/cadastro.dart'; 
+import 'screens/welcome.dart'; // Certifique-se de criar esta página ou de ajustar o nome conforme necessário
 
 void main() {
   runApp(const MyApp());
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const HubPage(), // Rota do Hub
         '/login': (context) => const LoginPage(), // Rota para Login
         '/cadastro': (context) => const CadastroPage(), // Rota para Cadastro
+        '/welcome': (context) => const WelcomePage(), // Rota para a página de boas-vindas
       },
     );
   }

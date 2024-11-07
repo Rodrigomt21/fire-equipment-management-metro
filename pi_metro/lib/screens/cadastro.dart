@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:email_validator/email_validator.dart';
@@ -23,7 +22,6 @@ class _CadastroPageState extends State<CadastroPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -97,42 +95,68 @@ class _CadastroPageState extends State<CadastroPage> {
   }
 
   void _register() async {
+    print('Tentando registrar o usuário...');  // Log inicial
+
     setState(() {
       errorMessage = null;
     });
 
-    final email = emailController.text;
+    // Removendo espaços ao redor do email
+    final email = emailController.text.trim();
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
 
-    if (!EmailValidator.validate(email)) {
-      setState(() {
-        errorMessage = 'Por favor, insira um email válido.';
-      });
+    // Validação de email com logs adicionais
+    print('Validando email: $email');
+    bool isValid = EmailValidator.validate(email);
+    print('Resultado da validação: $isValid');
+    
+    if (!isValid) {
+      if (mounted) {
+        setState(() {
+          errorMessage = 'Por favor, insira um email válido.';
+        });
+      }
+      print('Email inválido');
       return;
     }
 
     if (password != confirmPassword) {
-      setState(() {
-        errorMessage = 'As senhas não coincidem!';
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = 'As senhas não coincidem!';
+        });
+      }
+      print('Senhas não coincidem');
       return;
     }
 
     if (!_isPasswordValid(password)) {
-      setState(() {
-        errorMessage = 'A senha deve conter ao menos 6 caracteres, uma letra maiúscula e um caractere especial.';
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = 'A senha deve conter ao menos 6 caracteres, uma letra maiúscula e um caractere especial.';
+        });
+      }
+      print('Senha não atende aos requisitos');
       return;
     }
 
     try {
-      await AuthService().resgistra(email, password);
-      Navigator.pushNamed(context, '/welcome');
+      await AuthService().registra(email, password);
+      print('Registro realizado com sucesso');
+      if (mounted) {
+        Navigator.pushNamed(context, '/welcome');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Cadastro realizado com sucesso!')),
+        );
+      }
     } catch (e) {
-      setState(() {
-        errorMessage = 'Erro ao registrar usuário. Tente novamente.';
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = 'Erro ao registrar usuário. Tente novamente.';
+        });
+      }
+      print('Erro ao registrar usuário: $e');  // Log do erro em caso de falha
     }
   }
 

@@ -2,12 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  // URL base do backend
-  static const String _baseUrl = 'http://10.0.2.2:3000'; // '10.0.2.2' é o localhost para Android emulador
+  static const String _baseUrl = 'http://localhost:3000';
 
-  // Função para registrar o usuário
-  Future<void> resgistra(String email, String senha) async {
+  Future<void> registra(String email, String senha) async {
     final url = Uri.parse('$_baseUrl/cadastro');
+    print('Enviando dados de registro para o backend...');  // Log para verificar a chamada
 
     try {
       final response = await http.post(
@@ -15,19 +14,22 @@ class AuthService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': email,
-          'password': senha,
+          'senha': senha,
         }),
       );
 
-      if (response.statusCode != 200) {
+      if (response.statusCode == 200) {
+        print('Registro concluído com sucesso no backend');
+      } else {
+        print('Falha ao registrar usuário: ${response.body}');
         throw Exception('Falha ao registrar usuário: ${response.body}');
       }
     } catch (e) {
+      print('Erro de comunicação: $e');
       throw Exception('Erro de comunicação: $e');
     }
   }
 
-  // Função para verificar login e senha
   Future<bool> loginUser(String email, String password) async {
     final url = Uri.parse('$_baseUrl/login');
 
@@ -36,19 +38,15 @@ class AuthService {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'usernameOrEmail': email,
-          'password': password,
+          'email': email,
+          'senha': password,
         }),
       );
 
-      if (response.statusCode == 200) {
-        // Login bem-sucedido
-        return true;
-      } else {
-        // Credenciais inválidas
-        return false;
-      }
+      print('Resposta do servidor no login: ${response.statusCode}');
+      return response.statusCode == 200;
     } catch (e) {
+      print('Erro de comunicação: $e');
       throw Exception('Erro de comunicação: $e');
     }
   }
