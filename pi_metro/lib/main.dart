@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'screens/hub.dart';
-import 'screens/login.dart'; // Certifique-se de que este caminho está correto
+import 'screens/login.dart';
 import 'screens/cadastro.dart';
 import 'screens/ResetPasswordPage.dart';
+import 'screens/welcome.dart'; // Importe a tela de welcome, se não estiver importada
 
 void main() {
   runApp(const MyApp());
@@ -22,9 +23,10 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const HubPage(),
-        '/login': (context) => const LoginPage(), // Referência correta para LoginPage
+        '/login': (context) => const LoginPage(),
         '/cadastro': (context) => const CadastroPage(),
         '/reset-password': (context) => ResetPasswordPage(token: ''),
+        '/welcome': (context) => const WelcomePage(), // Certifique-se de que esta rota existe
       },
     );
   }

@@ -31,7 +31,7 @@ class AuthService {
     }
   }
 
-  Future<bool> loginUser(String email, String password) async {
+  Future<http.Response> loginUser(String email, String password) async {
     final url = Uri.parse('$_baseUrl/login');
 
     try {
@@ -45,7 +45,7 @@ class AuthService {
       );
 
       print('Resposta do servidor no login: ${response.statusCode}');
-      return response.statusCode == 200;
+      return response; // Retornando a resposta completa
     } catch (e) {
       print('Erro de comunicação: $e');
       throw Exception('Erro de comunicação: $e');
