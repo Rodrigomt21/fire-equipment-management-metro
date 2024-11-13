@@ -4,9 +4,9 @@ import 'package:http/http.dart' as http;
 class AuthService {
   static const String _baseUrl = 'http://localhost:3000';
 
+  // Função para registrar o usuário
   Future<void> registra(String nomeCompleto, String email, String senha) async {
     final url = Uri.parse('$_baseUrl/cadastro');
-    print('Enviando dados de registro para o backend...');
 
     try {
       final response = await http.post(
@@ -31,6 +31,7 @@ class AuthService {
     }
   }
 
+  // Função para login do usuário
   Future<http.Response> loginUser(String email, String password) async {
     final url = Uri.parse('$_baseUrl/login');
 
@@ -44,8 +45,7 @@ class AuthService {
         }),
       );
 
-      print('Resposta do servidor no login: ${response.statusCode}');
-      return response; // Retornando a resposta completa
+      return response;
     } catch (e) {
       print('Erro de comunicação: $e');
       throw Exception('Erro de comunicação: $e');

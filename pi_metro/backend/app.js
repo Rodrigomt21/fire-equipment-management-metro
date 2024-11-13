@@ -141,8 +141,8 @@ app.post('/forgot-password', (req, res) => {
                 return res.status(500).json({ error: 'Erro no servidor ao salvar token de recuperação' });
             }
 
-            // Envia o email com o link de recuperação
-            const resetUrl = `${process.env.RESET_PASSWORD_URL}?token=${token}`;
+            // Link de recuperação HTTP para o navegador
+            const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
             const mailOptions = {
                 from: process.env.EMAIL_USER,
                 to: email,
@@ -162,17 +162,57 @@ app.post('/forgot-password', (req, res) => {
     });
 });
 
-// Rota para redefinir a senha
+// Rota GET para exibir o formulário de redefinição de senha
+app.get('/reset-password', (req, res) => {
+    const { token } = req.query;
+    if (!token) {
+        return res.status(400).send('Token inválido ou ausente.');
+    }
+
+    // Retorna uma página HTML mais completa com o formulário de redefinição de senha
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Redefinir Senha</title>
+            <style>
+                body { font-family: Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+                .container { width: 100%; max-width: 400px; padding: 20px; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+                h2 { text-align: center; }
+                label { display: block; margin-top: 10px; }
+                input[type="password"], button { width: 100%; padding: 10px; margin-top: 10px; }
+                button { background-color: #007bff; color: white; border: none; cursor: pointer; }
+                button:hover { background-color: #0056b3; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>Redefinir Senha</h2>
+                <form action="/reset-password" method="POST">
+                    <input type="hidden" name="token" value="${token}" />
+                    <label for="newPassword">Nova Senha:</label>
+                    <input type="password" name="newPassword" id="newPassword" required minlength="6" />
+                    <button type="submit">Redefinir Senha</button>
+                </form>
+            </div>
+        </body>
+        </html>
+    `);
+});
+
+// Rota POST para processar a nova senha
 app.post('/reset-password', [
     check('token').not().isEmpty().withMessage('Token é obrigatório'),
-    check('novaSenha').isLength({ min: 6 }).withMessage('A nova senha deve ter pelo menos 6 caracteres')
+    check('newPassword').isLength({ min: 6 }).withMessage('A nova senha deve ter pelo menos 6 caracteres')
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { token, novaSenha } = req.body;
+    const { token, newPassword } = req.body;
 
     // Verifica se o token é válido e se não expirou
     const sql = 'SELECT * FROM users WHERE reset_password_token = ? AND reset_password_expires > NOW()';
@@ -187,7 +227,7 @@ app.post('/reset-password', [
         }
 
         // Hash da nova senha e atualização no banco de dados
-        const hashedPassword = await bcrypt.hash(novaSenha, 10);
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
         const updatePasswordSql = 'UPDATE users SET senha = ?, reset_password_token = NULL, reset_password_expires = NULL WHERE reset_password_token = ?';
 
         db.query(updatePasswordSql, [hashedPassword, token], (err) => {
@@ -200,7 +240,6 @@ app.post('/reset-password', [
         });
     });
 });
-
 
 // Iniciar o servidor
 app.listen(port, () => {

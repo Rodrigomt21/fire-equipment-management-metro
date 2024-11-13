@@ -1,9 +1,8 @@
-// login.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:email_validator/email_validator.dart';
 import '/services/auth_services.dart';
+import '/screens/forgot_password_screen.dart'; // Importe a nova tela de recuperação
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -105,7 +104,14 @@ class _LoginPageState extends State<LoginPage> {
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: GestureDetector(
-                                  onTap: _forgotPassword,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ForgotPasswordScreen(),
+                                      ),
+                                    );
+                                  },
                                   child: Text(
                                     'Esqueceu a senha?',
                                     style: GoogleFonts.poppins(
@@ -216,28 +222,6 @@ class _LoginPageState extends State<LoginPage> {
           errorMessage = 'Erro de comunicação. Tente novamente.';
         });
       }
-    }
-  }
-
-  void _forgotPassword() async {
-    final email = emailController.text.trim();
-
-    if (!EmailValidator.validate(email)) {
-      setState(() {
-        errorMessage = 'Por favor, insira um email válido para redefinir a senha.';
-      });
-      return;
-    }
-
-    try {
-      await AuthService().forgotPassword(email);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Instruções para redefinir a senha foram enviadas para o seu email.')),
-      );
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Erro ao enviar instruções de recuperação. Tente novamente.';
-      });
     }
   }
 }
