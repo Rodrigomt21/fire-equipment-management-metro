@@ -17,6 +17,8 @@ dependencies:
   google_fonts: ^6.2.1
   email_validator: ^2.0.1
   uni_links: ^0.5.1
+  shared_preferences: ^2.0.17 
+
 
 dev_dependencies:
   flutter_test:
@@ -27,5 +29,7 @@ flutter:
   assets:
     - lib/imgs/fundoHub.png
     - lib/imgs/telaCadastro.png
+    - lib/imgs/trilhos.png
+    - lib/imgs/logo.png
     - lib/imgs/telaLogin.png
   uses-material-design: true

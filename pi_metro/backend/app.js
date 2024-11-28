@@ -1,29 +1,20 @@
-require('dotenv').config({ path: 'variaveis.env' }); // Importa variáveis de ambiente
+require('dotenv').config({ path: 'variaveis.env' });
 const express = require('express');
 const mysql = require('mysql2');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt'); // Para hashing de senhas
-const rateLimit = require('express-rate-limit'); // Limite de tentativas de login
-const { check, validationResult } = require('express-validator'); // Validação de entrada
 const crypto = require('crypto'); // Para geração de tokens seguros
 const nodemailer = require('nodemailer'); // Para envio de emails
 
 const app = express();
 const port = 3000;
 
-// Middleware para interpretar JSON e habilitar CORS
+// Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json()); // Processa JSON do body
+app.use(express.urlencoded({ extended: true })); // Processa dados de formulário (opcional)
 
-// Configuração do limitador de tentativas de login
-const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 5, // Limita a 5 tentativas
-    message: "Muitas tentativas de login. Tente novamente após 15 minutos."
-});
-
-// Conexão com o MySQL usando variáveis de ambiente
+// Conexão com o banco de dados MySQL
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -39,7 +30,7 @@ db.connect(err => {
     }
 });
 
-// Configuração do Nodemailer para envio de email
+// Configuração do Nodemailer
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
@@ -50,126 +41,142 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-// Rota para registrar usuários com validação de entrada
-app.post('/cadastro', [
-    check('nomeCompleto').not().isEmpty().withMessage('Nome completo é obrigatório'),
-    check('email').isEmail().withMessage('Email inválido'),
-    check('senha').isLength({ min: 6 }).withMessage('Senha precisa ter ao menos 6 caracteres')
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
+// Registro de usuário
+app.post('/cadastro', async (req, res) => {
     const { nomeCompleto, email, senha } = req.body;
 
-    try {
-        // Hash da senha antes de armazenar
-        const hashedPassword = await bcrypt.hash(senha, 10);
+    if (!nomeCompleto || !email || !senha || senha.length < 6) {
+        return res.status(400).json({ error: 'Dados inválidos ou senha muito curta.' });
+    }
 
-        // Inserindo nomeCompleto, email e senha no banco
+    try {
+        const hashedPassword = await bcrypt.hash(senha, 10);
         const sql = 'INSERT INTO users (nomeCompleto, email, senha) VALUES (?, ?, ?)';
-        
+
         db.query(sql, [nomeCompleto, email, hashedPassword], (err, result) => {
             if (err) {
-                console.error('Erro ao inserir usuário:', err);
-                res.status(500).json({ error: 'Erro ao registrar usuário' });
-            } else {
-                res.status(200).send('Usuário registrado com sucesso');
+                console.error('Erro ao registrar usuário:', err);
+                return res.status(500).json({ error: 'Erro ao registrar usuário' });
             }
+            res.status(200).send('Usuário registrado com sucesso.');
         });
     } catch (err) {
-        console.error('Erro ao registrar usuário:', err);
-        res.status(500).json({ error: 'Erro no servidor ao registrar usuário' });
+        console.error('Erro no servidor:', err);
+        res.status(500).json({ error: 'Erro no servidor' });
     }
 });
 
-// Rota para verificar login e senha com limitador
-app.post('/login', loginLimiter, (req, res) => {
-    const { email, senha } = req.body;
+// Buscar dados do usuário por email
+app.get('/usuario', (req, res) => {
+    const { email } = req.query;
 
-    const sql = 'SELECT * FROM users WHERE email = ?';
-    
-    db.query(sql, [email], (err, result) => {
+    if (!email) {
+        return res.status(400).json({ error: 'Email é obrigatório.' });
+    }
+
+    const sql = 'SELECT nomeCompleto FROM users WHERE email = ?';
+    db.query(sql, [email], (err, results) => {
         if (err) {
             console.error('Erro ao buscar usuário:', err);
-            res.status(500).json({ error: 'Erro no servidor ao buscar usuário' });
-            return;
+            return res.status(500).json({ error: 'Erro ao buscar usuário.' });
         }
 
-        if (result.length > 0) {
-            // Comparar senha fornecida com a senha armazenada no banco de dados
-            bcrypt.compare(senha, result[0].senha, (err, isMatch) => {
-                if (isMatch) {
-                    res.status(200).send('Login bem-sucedido.');
-                } else {
-                    res.status(401).json({ error: 'Credenciais inválidas.' });
-                }
-            });
-        } else {
-            res.status(401).json({ error: 'Credenciais inválidas.' });
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Usuário não encontrado.' });
         }
+
+        res.status(200).json({ nomeCompleto: results[0].nomeCompleto });
     });
 });
 
-// Rota para recuperação de senha
-app.post('/forgot-password', (req, res) => {
-    const { email } = req.body;
 
-    // Verifica se o email existe no banco de dados
+// Login
+app.post('/login', (req, res) => {
+    const { email, senha } = req.body;
+
+    if (!email || !senha) {
+        return res.status(400).json({ status: false, message: 'Email e senha são obrigatórios.' });
+    }
+
     const sql = 'SELECT * FROM users WHERE email = ?';
     db.query(sql, [email], (err, results) => {
         if (err) {
             console.error('Erro ao buscar usuário:', err);
-            return res.status(500).json({ error: 'Erro no servidor ao buscar usuário' });
+            return res.status(500).json({ status: false, message: 'Erro no servidor ao buscar usuário' });
         }
 
         if (results.length === 0) {
-            return res.status(404).json({ error: 'Email não encontrado' });
+            return res.status(401).json({ status: false, message: 'Credenciais inválidas.' });
         }
 
-        // Gera um token para redefinição de senha
+        const user = results[0];
+        bcrypt.compare(senha, user.senha, (err, isMatch) => {
+            if (err || !isMatch) {
+                return res.status(401).json({ status: false, message: 'Credenciais inválidas.' });
+            }
+            res.status(200).json({ status: true, message: 'Login bem-sucedido.', nomeCompleto: user.nomeCompleto });
+        });
+    });
+});
+
+app.post('/forgot-password', (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: 'Email é obrigatório.' });
+    }
+
+    const sql = 'SELECT * FROM users WHERE email = ?';
+    db.query(sql, [email], (err, results) => {
+        if (err) {
+            console.error('Erro ao buscar email:', err);
+            return res.status(500).json({ error: 'Erro no servidor' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Email não encontrado.' });
+        }
+
         const token = crypto.randomBytes(20).toString('hex');
+        const tokenExpiration = new Date(Date.now() + 3600000); // 1 hora
 
-        // Define o token e a validade (1 hora) no banco de dados
-        const tokenExpiration = new Date(Date.now() + 3600000); // 1 hora a partir de agora
-        const updateTokenSql = 'UPDATE users SET reset_password_token = ?, reset_password_expires = ? WHERE email = ?';
-
+        const updateTokenSql = `
+            UPDATE users SET reset_password_token = ?, reset_password_expires = ? WHERE email = ?`;
         db.query(updateTokenSql, [token, tokenExpiration, email], (err) => {
             if (err) {
-                console.error('Erro ao salvar o token no banco de dados:', err);
-                return res.status(500).json({ error: 'Erro no servidor ao salvar token de recuperação' });
+                console.error('Erro ao salvar token:', err);
+                return res.status(500).json({ error: 'Erro ao salvar token de recuperação' });
             }
 
-            // Link de recuperação HTTP para o navegador
             const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
             const mailOptions = {
                 from: process.env.EMAIL_USER,
                 to: email,
                 subject: 'Recuperação de senha',
-                text: `Você solicitou a recuperação de senha. Clique no link a seguir para redefinir sua senha: ${resetUrl}`,
-                html: `<p>Você solicitou a recuperação de senha. Clique no link a seguir para redefinir sua senha:</p><p><a href="${resetUrl}">Redefinir senha</a></p>`,
+                text: `Clique no link para redefinir sua senha: ${resetUrl}`,
+                html: `<p>Clique no link para redefinir sua senha:</p><p><a href="${resetUrl}">Redefinir senha</a></p>`,
             };
 
-            transporter.sendMail(mailOptions, (err, info) => {
+            transporter.sendMail(mailOptions, (err) => {
                 if (err) {
                     console.error('Erro ao enviar email:', err);
-                    return res.status(500).json({ error: 'Erro ao enviar email de recuperação' });
+                    return res.status(500).json({ error: 'Erro ao enviar email' });
                 }
-                res.status(200).json({ message: 'Email de recuperação enviado com sucesso' });
+                res.status(200).json({ message: 'Email de recuperação enviado.' });
             });
         });
     });
 });
 
+
 // Rota GET para exibir o formulário de redefinição de senha
 app.get('/reset-password', (req, res) => {
     const { token } = req.query;
+
     if (!token) {
         return res.status(400).send('Token inválido ou ausente.');
     }
 
-    // Retorna uma página HTML mais completa com o formulário de redefinição de senha
     res.send(`
         <!DOCTYPE html>
         <html lang="pt-BR">
@@ -178,11 +185,11 @@ app.get('/reset-password', (req, res) => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Redefinir Senha</title>
             <style>
-                body { font-family: Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-                .container { width: 100%; max-width: 400px; padding: 20px; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-                h2 { text-align: center; }
-                label { display: block; margin-top: 10px; }
-                input[type="password"], button { width: 100%; padding: 10px; margin-top: 10px; }
+                body { font-family: Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f4f4f4; }
+                .container { width: 100%; max-width: 400px; padding: 20px; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); background: #fff; }
+                h2 { text-align: center; color: #333; }
+                label { display: block; margin-top: 10px; font-size: 14px; color: #333; }
+                input[type="password"], button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #ddd; }
                 button { background-color: #007bff; color: white; border: none; cursor: pointer; }
                 button:hover { background-color: #0056b3; }
             </style>
@@ -202,46 +209,117 @@ app.get('/reset-password', (req, res) => {
     `);
 });
 
-// Rota POST para processar a nova senha
-app.post('/reset-password', [
-    check('token').not().isEmpty().withMessage('Token é obrigatório'),
-    check('newPassword').isLength({ min: 6 }).withMessage('A nova senha deve ter pelo menos 6 caracteres')
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
+app.post('/reset-password', async (req, res) => {
     const { token, newPassword } = req.body;
 
-    // Verifica se o token é válido e se não expirou
+    if (!token || !newPassword || newPassword.length < 6) {
+        return res.send(`
+            <!DOCTYPE html>
+            <html lang="pt-BR">
+            <head>
+                <meta charset="UTF-8">
+                <title>Erro na Redefinição de Senha</title>
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                    .error { color: red; }
+                </style>
+            </head>
+            <body>
+                <h2 class="error">Token inválido ou senha muito curta.</h2>
+                <a href="/reset-password?token=${token}">Tente novamente</a>
+            </body>
+            </html>
+        `);
+    }
+
     const sql = 'SELECT * FROM users WHERE reset_password_token = ? AND reset_password_expires > NOW()';
     db.query(sql, [token], async (err, results) => {
         if (err) {
-            console.error('Erro ao buscar token no banco de dados:', err);
-            return res.status(500).json({ error: 'Erro no servidor ao verificar token' });
+            console.error('Erro ao buscar token:', err);
+            return res.send(`
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Erro no Servidor</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                        .error { color: red; }
+                    </style>
+                </head>
+                <body>
+                    <h2 class="error">Erro no servidor. Por favor, tente novamente mais tarde.</h2>
+                </body>
+                </html>
+            `);
         }
 
         if (results.length === 0) {
-            return res.status(400).json({ error: 'Token inválido ou expirado' });
+            return res.send(`
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Token Inválido ou Expirado</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                        .error { color: red; }
+                    </style>
+                </head>
+                <body>
+                    <h2 class="error">Token inválido ou expirado.</h2>
+                    <a href="/forgot-password">Solicitar novo token</a>
+                </body>
+                </html>
+            `);
         }
 
-        // Hash da nova senha e atualização no banco de dados
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        const updatePasswordSql = 'UPDATE users SET senha = ?, reset_password_token = NULL, reset_password_expires = NULL WHERE reset_password_token = ?';
-
+        const updatePasswordSql = `
+            UPDATE users SET senha = ?, reset_password_token = NULL, reset_password_expires = NULL WHERE reset_password_token = ?`;
         db.query(updatePasswordSql, [hashedPassword, token], (err) => {
             if (err) {
-                console.error('Erro ao atualizar senha no banco de dados:', err);
-                return res.status(500).json({ error: 'Erro ao atualizar senha' });
+                console.error('Erro ao atualizar senha:', err);
+                return res.send(`
+                    <!DOCTYPE html>
+                    <html lang="pt-BR">
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Erro ao Atualizar Senha</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                            .error { color: red; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2 class="error">Erro ao atualizar senha. Tente novamente mais tarde.</h2>
+                    </body>
+                    </html>
+                `);
             }
 
-            res.status(200).json({ message: 'Senha atualizada com sucesso' });
+            res.send(`
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Senha Atualizada</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                        .success { color: green; }
+                    </style>
+                </head>
+                <body>
+                    <h2 class="success">Senha atualizada com sucesso!</h2>
+                </body>
+                </html>
+            `);
         });
     });
 });
 
-// Iniciar o servidor
+
+// Inicia o servidor
 app.listen(port, () => {
     console.log(`Servidor rodando em http://localhost:${port}`);
 });
