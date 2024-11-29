@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
@@ -10,13 +11,36 @@ import 'screens/cadastro.dart';
 import 'screens/forgot_password_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'screens/welcome_dashboard.dart';
+import 'screens/linha_opcoes.dart'; // Nova tela de opções para a linha
+import 'services/user_provider.dart';
+
+class MyCustomPageRoute<T> extends MaterialPageRoute<T> {
+  MyCustomPageRoute({required WidgetBuilder builder, RouteSettings? settings})
+      : super(builder: builder, settings: settings);
+
+  @override
+  Widget buildTransitions(
+      BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    if (settings.name == '/') {
+      return child; // Não anima a tela inicial
+    }
+    return FadeTransition(opacity: animation, child: child);
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-  runApp(MyApp(isLoggedIn: isLoggedIn));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: MyApp(isLoggedIn: isLoggedIn),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -92,19 +116,34 @@ class _MyAppState extends State<MyApp> {
         primaryColor: const Color(0xFF001489),
       ),
       initialRoute: widget.isLoggedIn ? '/welcome-dashboard' : '/login',
-      routes: {
-        '/': (context) => const HubPage(),
-        '/login': (context) => const LoginPage(),
-        '/cadastro': (context) => const CadastroPage(),
-        '/forgot-password': (context) => ForgotPasswordScreen(),
-        '/reset-password': (context) => ResetPasswordScreenHandler(),
-        '/welcome-dashboard': (context) {
-          final args = ModalRoute.of(context)?.settings.arguments as Map?;
-          return WelcomeDashboard(
-            nomeUsuario: args?['nomeUsuario'] ?? 'Usuário',
-            cargoUsuario: 'Bem-vindo',
-          );
-        },
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/':
+            return MyCustomPageRoute(builder: (_) => const HubPage());
+          case '/login':
+            return MyCustomPageRoute(builder: (_) => const LoginPage());
+          case '/cadastro':
+            return MyCustomPageRoute(builder: (_) => const CadastroPage());
+          case '/forgot-password':
+            return MyCustomPageRoute(builder: (_) => ForgotPasswordScreen());
+          case '/reset-password':
+            return MyCustomPageRoute(builder: (_) => ResetPasswordScreenHandler());
+          case '/welcome-dashboard':
+            return MyCustomPageRoute(
+              builder: (_) => WelcomeDashboard(
+                nomeUsuario: Provider.of<UserProvider>(context, listen: false).userName ?? 'Usuário',
+                cargoUsuario: 'Administrador',
+              ),
+            );
+          case '/linha-opcoes': // Adicionada nova rota
+            final args = settings.arguments as Map<String, String>;
+            final linha = args['linha'] ?? 'Linha Não Definida';
+            return MyCustomPageRoute(
+              builder: (_) => LinhaOpcoesScreen(linhaSelecionada: linha),
+            );
+          default:
+            return null;
+        }
       },
     );
   }

@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -244,7 +245,7 @@ class _LoginPageState extends State<LoginPage> {
         // Salvar estado de login e nome do usuário
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isLoggedIn', true);
-        await prefs.setString('nomeUsuario', nomeUsuario); // Salva o nome
+        await prefs.setString('nomeUsuario', nomeUsuario);
 
         // Redirecionar para o dashboard
         Navigator.pushReplacementNamed(

@@ -3,14 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomeDashboard extends StatefulWidget {
-  final String? nomeUsuario; // Parâmetro nomeado
-  final String cargoUsuario;
-
-  const WelcomeDashboard({
-    Key? key,
-    this.nomeUsuario,
-    required this.cargoUsuario,
-  }) : super(key: key);
+  const WelcomeDashboard({Key? key}) : super(key: key);
 
   @override
   _WelcomeDashboardState createState() => _WelcomeDashboardState();
@@ -18,6 +11,7 @@ class WelcomeDashboard extends StatefulWidget {
 
 class _WelcomeDashboardState extends State<WelcomeDashboard> {
   late String nomeUsuario;
+  String? linhaSelecionada;
 
   @override
   void initState() {
@@ -25,19 +19,13 @@ class _WelcomeDashboardState extends State<WelcomeDashboard> {
     _initializeNomeUsuario();
   }
 
-  // Inicializa o nome do usuário, priorizando o argumento passado
+  // Inicializa o nome do usuário
   void _initializeNomeUsuario() async {
-    if (widget.nomeUsuario != null && widget.nomeUsuario!.isNotEmpty) {
-      setState(() {
-        nomeUsuario = widget.nomeUsuario!;
-      });
-    } else {
-      final prefs = await SharedPreferences.getInstance();
-      final nome = prefs.getString('nomeUsuario') ?? 'Usuário';
-      setState(() {
-        nomeUsuario = nome;
-      });
-    }
+    final prefs = await SharedPreferences.getInstance();
+    final nome = prefs.getString('nomeUsuario') ?? 'Usuário';
+    setState(() {
+      nomeUsuario = nome;
+    });
   }
 
   // Método para realizar o logout
@@ -53,170 +41,141 @@ class _WelcomeDashboardState extends State<WelcomeDashboard> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF001489),
-        title: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        title: Text(
+          'Bem-vindo, $nomeUsuario',
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _logout(context),
+          ),
+        ],
+      ),
+      body: Center(
+        child: Container(
+          margin: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.85),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Bem-vindo, $nomeUsuario',
+                'Selecione a linha para continuar.',
                 style: GoogleFonts.poppins(
                   fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: Colors.grey[700],
                 ),
+                textAlign: TextAlign.center,
               ),
-              Row(
-                children: [
-                  Text(
-                    widget.cargoUsuario,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.white70,
+              const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0xFFEFEFEF),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                hint: const Text('Escolha uma linha'),
+                value: linhaSelecionada,
+                dropdownColor: Colors.white, // Fundo do dropdown
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  color: const Color(0xFF001489), // Destaque para o item selecionado
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'Linha 1 - Azul',
+                    child: Text(
+                      'Linha 1 - Azul',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: const Color(0xFF001489),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  IconButton(
-                    icon: const Icon(Icons.logout),
-                    color: Colors.white,
-                    onPressed: () => _logout(context),
+                  DropdownMenuItem(
+                    value: 'Linha 2 - Verde',
+                    child: Text(
+                      'Linha 2 - Verde',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: const Color(0xFF001489),
+                      ),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Linha 3 - Vermelha',
+                    child: Text(
+                      'Linha 3 - Vermelha',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: const Color(0xFF001489),
+                      ),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Linha 15 - Prata',
+                    child: Text(
+                      'Linha 15 - Prata',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: const Color(0xFF001489),
+                      ),
+                    ),
                   ),
                 ],
+                onChanged: (value) {
+                  setState(() {
+                    linhaSelecionada = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (linhaSelecionada != null) {
+                    Navigator.pushNamed(
+                      context,
+                      '/linha-opcoes',
+                      arguments: {'linha': linhaSelecionada!},
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Por favor, selecione uma linha.'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF001489),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Confirmar',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ],
           ),
         ),
-      ),
-      body: Stack(
-        children: [
-          // Fundo da tela
-          Positioned.fill(
-            child: Image.asset(
-              'lib/imgs/trilhos.png', // Substitua pelo caminho correto
-              fit: BoxFit.cover,
-            ),
-          ),
-          // Conteúdo principal
-          Center(
-            child: Container(
-              margin: const EdgeInsets.all(20),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.85),
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'Olá, $nomeUsuario!',
-                    style: GoogleFonts.poppins(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF001489),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Selecione a linha para continuar.',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color(0xFFEFEFEF),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    hint: Text(
-                      'Escolha a linha desejada',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    dropdownColor: const Color(0xFF001489),
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.white,
-                    ),
-                    items: [
-                      DropdownMenuItem(
-                        value: '1',
-                        child: Text('Linha 1 - Azul'),
-                      ),
-                      DropdownMenuItem(
-                        value: '2',
-                        child: Text('Linha 2 - Verde'),
-                      ),
-                      DropdownMenuItem(
-                        value: '3',
-                        child: Text('Linha 3 - Vermelha'),
-                      ),
-                      DropdownMenuItem(
-                        value: '15',
-                        child: Text('Linha 15 - Prata'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      // Lógica para tratar seleção
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Ação do botão
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF001489),
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      'Confirmar',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Logo na parte inferior direita
-          Positioned(
-            bottom: 20,
-            right: 20,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  'lib/imgs/logo.png', // Substitua pelo caminho correto
-                  width: 100,
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
