@@ -3,7 +3,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomeDashboard extends StatefulWidget {
-  const WelcomeDashboard({Key? key}) : super(key: key);
+  final String nomeUsuario;
+  final String cargoUsuario;
+
+  const WelcomeDashboard({
+    Key? key,
+    required this.nomeUsuario,
+    required this.cargoUsuario,
+  }) : super(key: key);
 
   @override
   _WelcomeDashboardState createState() => _WelcomeDashboardState();
@@ -16,16 +23,7 @@ class _WelcomeDashboardState extends State<WelcomeDashboard> {
   @override
   void initState() {
     super.initState();
-    _initializeNomeUsuario();
-  }
-
-  // Inicializa o nome do usuário
-  void _initializeNomeUsuario() async {
-    final prefs = await SharedPreferences.getInstance();
-    final nome = prefs.getString('nomeUsuario') ?? 'Usuário';
-    setState(() {
-      nomeUsuario = nome;
-    });
+    nomeUsuario = widget.nomeUsuario;
   }
 
   // Método para realizar o logout
@@ -87,10 +85,10 @@ class _WelcomeDashboardState extends State<WelcomeDashboard> {
                 ),
                 hint: const Text('Escolha uma linha'),
                 value: linhaSelecionada,
-                dropdownColor: Colors.white, // Fundo do dropdown
+                dropdownColor: Colors.white,
                 style: GoogleFonts.poppins(
                   fontSize: 16,
-                  color: const Color(0xFF001489), // Destaque para o item selecionado
+                  color: const Color(0xFF001489),
                 ),
                 items: [
                   DropdownMenuItem(
