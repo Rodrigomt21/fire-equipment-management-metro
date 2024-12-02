@@ -3,58 +3,38 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class CadastroPage extends StatefulWidget {
-  const CadastroPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  _CadastroPageState createState() => _CadastroPageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _CadastroPageState extends State<CadastroPage> {
-  final TextEditingController nomeCompletoController = TextEditingController();
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
 
   bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
   String? errorMessage;
 
-  // Método para validar a senha
-  bool _isPasswordValid(String password) {
-    final regex = RegExp(r'^(?=.*?[A-Z])(?=.*?[!@#\$&*~]).{6,}$');
-    return regex.hasMatch(password);
-  }
-
-  // Método para criar os campos de texto
+  // Método para criar campos de texto com estilo
   Widget _buildTextField(String hint, TextEditingController controller,
-      {bool isPassword = false, bool isConfirmPassword = false}) {
+      {bool isPassword = false}) {
     return TextField(
       controller: controller,
-      obscureText: isPassword
-          ? !_isPasswordVisible
-          : isConfirmPassword
-              ? !_isConfirmPasswordVisible
-              : false,
+      obscureText: isPassword ? !_isPasswordVisible : false,
       decoration: InputDecoration(
         hintText: hint,
-        suffixIcon: isPassword || isConfirmPassword
+        suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(
-                  (isPassword && _isPasswordVisible) ||
-                          (isConfirmPassword && _isConfirmPasswordVisible)
-                      ? Icons.visibility
-                      : Icons.visibility_off,
+                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                 ),
                 onPressed: () {
                   setState(() {
-                    if (isPassword) {
-                      _isPasswordVisible = !_isPasswordVisible;
-                    } else if (isConfirmPassword) {
-                      _isConfirmPasswordVisible =
-                          !_isConfirmPasswordVisible;
-                    }
+                    _isPasswordVisible = !_isPasswordVisible;
                   });
                 },
               )
@@ -78,7 +58,7 @@ class _CadastroPageState extends State<CadastroPage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Coluna do lado esquerdo aprimorada
+            // Coluna do lado esquerdo
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -87,12 +67,12 @@ class _CadastroPageState extends State<CadastroPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Image.asset(
-                      'lib/imgs/logo.png',
+                      'lib/imgs/logo.png', // Substitua pelo caminho da sua logo
                       height: 50,
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Cadastro',
+                      'Bem-vindo de volta!',
                       style: GoogleFonts.poppins(
                         fontSize: 36,
                         fontWeight: FontWeight.bold,
@@ -100,7 +80,7 @@ class _CadastroPageState extends State<CadastroPage> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Crie sua conta e faça parte do time!\nComece a gerenciar seus equipamentos\ncom eficiência e facilidade.',
+                      'Acesse sua conta para continuar\ncom o gerenciamento dos equipamentos.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
@@ -111,15 +91,15 @@ class _CadastroPageState extends State<CadastroPage> {
                     Column(
                       children: [
                         Text(
-                          'Já tem uma conta?',
+                          'Ainda não tem uma conta?',
                           style: GoogleFonts.poppins(fontSize: 14),
                         ),
                         GestureDetector(
                           onTap: () {
-                            Navigator.pushNamed(context, '/login');
+                            Navigator.pushNamed(context, '/cadastro');
                           },
                           child: Text(
-                            'Faça login aqui!',
+                            'Cadastre-se aqui!',
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               color: const Color(0xFF001489),
@@ -133,7 +113,7 @@ class _CadastroPageState extends State<CadastroPage> {
                 ),
               ),
             ),
-            // Coluna do lado direito com o card do formulário
+            // Coluna do lado direito com o card de login
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -165,7 +145,7 @@ class _CadastroPageState extends State<CadastroPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Cadastro',
+                          'Login',
                           style: GoogleFonts.poppins(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -175,18 +155,9 @@ class _CadastroPageState extends State<CadastroPage> {
                         _buildTextField('Digite seu e-mail', emailController),
                         const SizedBox(height: 15),
                         _buildTextField(
-                            'Digite seu nome completo', nomeCompletoController),
-                        const SizedBox(height: 15),
-                        _buildTextField(
                           'Senha',
                           passwordController,
                           isPassword: true,
-                        ),
-                        const SizedBox(height: 15),
-                        _buildTextField(
-                          'Confirme sua senha',
-                          confirmPasswordController,
-                          isConfirmPassword: true,
                         ),
                         const SizedBox(height: 30),
                         if (errorMessage != null)
@@ -195,7 +166,7 @@ class _CadastroPageState extends State<CadastroPage> {
                             style: const TextStyle(color: Colors.red),
                           ),
                         ElevatedButton(
-                          onPressed: _register,
+                          onPressed: _login,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF001489),
                             shape: RoundedRectangleBorder(
@@ -206,11 +177,25 @@ class _CadastroPageState extends State<CadastroPage> {
                           ),
                           child: Center(
                             child: Text(
-                              'Cadastrar',
+                              'Entrar',
                               style: GoogleFonts.poppins(
                                 fontSize: 20,
                                 color: Colors.white,
                               ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/forgot-password');
+                          },
+                          child: Text(
+                            'Esqueceu sua senha?',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: const Color(0xFF001489),
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -226,22 +211,9 @@ class _CadastroPageState extends State<CadastroPage> {
     );
   }
 
-  void _register() async {
-    setState(() {
-      errorMessage = null;
-    });
-
-    final nomeCompleto = nomeCompletoController.text.trim();
+  void _login() async {
     final email = emailController.text.trim();
-    final password = passwordController.text;
-    final confirmPassword = confirmPasswordController.text;
-
-    if (nomeCompleto.isEmpty) {
-      setState(() {
-        errorMessage = 'Por favor, insira seu nome completo.';
-      });
-      return;
-    }
+    final password = passwordController.text.trim();
 
     if (!EmailValidator.validate(email)) {
       setState(() {
@@ -250,53 +222,34 @@ class _CadastroPageState extends State<CadastroPage> {
       return;
     }
 
-    if (password != confirmPassword) {
+    if (password.isEmpty) {
       setState(() {
-        errorMessage = 'As senhas não coincidem!';
-      });
-      return;
-    }
-
-    if (!_isPasswordValid(password)) {
-      setState(() {
-        errorMessage = 'A senha deve conter pelo menos 6 caracteres, uma letra maiúscula e um caractere especial.';
+        errorMessage = 'Por favor, insira sua senha.';
       });
       return;
     }
 
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:3000/cadastro'),
+        Uri.parse('http://localhost:3000/login'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'nomeCompleto': nomeCompleto,
-          'email': email,
-          'senha': password,
-        }),
+        body: jsonEncode({'email': email, 'senha': password}),
       );
 
       if (response.statusCode == 200) {
-        final userResponse = await http.get(
-          Uri.parse('http://localhost:3000/usuario?email=$email'),
-        );
+        final responseData = jsonDecode(response.body);
+        final nomeUsuario = responseData['nomeCompleto'];
 
-        if (userResponse.statusCode == 200) {
-          final userData = jsonDecode(userResponse.body);
-          final nomeUsuario = userData['nomeCompleto'];
+        // Salvar estado de login e nome do usuário
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('nomeUsuario', nomeUsuario);
 
-          Navigator.pushReplacementNamed(
-            context,
-            '/welcome-dashboard',
-            arguments: {'nomeUsuario': nomeUsuario},
-          );
-        } else {
-          setState(() {
-            errorMessage = 'Erro ao buscar informações do usuário.';
-          });
-        }
+        // Redirecionar para o dashboard
+        Navigator.pushReplacementNamed(context, '/welcome-dashboard');
       } else {
         setState(() {
-          errorMessage = 'Erro ao registrar usuário.';
+          errorMessage = 'Email ou senha incorretos. Tente novamente.';
         });
       }
     } catch (e) {

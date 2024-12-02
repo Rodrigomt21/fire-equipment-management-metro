@@ -29,10 +29,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     });
 
     try {
-      // Chama o serviço para enviar o e-mail de recuperação de senha
       await AuthService().forgotPassword(email);
 
-      // Exibe uma mensagem de sucesso sem sair da tela
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Email de recuperação enviado com sucesso. Verifique seu e-mail.'),
@@ -49,7 +47,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
   }
 
-  // Método para criar campos de texto com estilo
   Widget _buildTextField(String hint, TextEditingController controller) {
     return TextField(
       controller: controller,
@@ -68,73 +65,52 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
-      body: Center(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Coluna do lado esquerdo
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'lib/imgs/logo.png', // Substitua pelo caminho da sua logo
-                      height: 50,
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Esqueceu a Senha?',
-                      style: GoogleFonts.poppins(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Digite seu e-mail para receber\num link de recuperação.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                    if (errorMessage != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
-                        child: Text(
-                          errorMessage!,
-                          style: const TextStyle(color: Colors.red, fontSize: 14),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            // Coluna do lado direito com o card de envio de email
-            Expanded(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isSmallScreen = constraints.maxWidth < 600;
+
+          return Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  Image.asset(
+                    'lib/imgs/logo.png',
+                    height: isSmallScreen ? 40 : 60,
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Esqueceu a Senha?',
+                    style: GoogleFonts.poppins(
+                      fontSize: isSmallScreen ? 28 : 36,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Digite seu e-mail para receber\num link de recuperação.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: isSmallScreen ? 14 : 16,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Text(
+                        errorMessage!,
+                        style: const TextStyle(color: Colors.red, fontSize: 14),
+                      ),
+                    ),
                   const SizedBox(height: 20),
                   Container(
-                    width: screenWidth * 0.4,
+                    width: isSmallScreen ? double.infinity : constraints.maxWidth * 0.5,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      image: DecorationImage(
-                        image: AssetImage('lib/imgs/trilhos.png'),
-                        fit: BoxFit.cover,
-                        colorFilter: ColorFilter.mode(
-                          Colors.white.withOpacity(0.6),
-                          BlendMode.lighten,
-                        ),
-                      ),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
@@ -150,7 +126,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         _buildTextField('Digite seu e-mail', _emailController),
                         const SizedBox(height: 20),
                         isLoading
-                            ? const Center(child: CircularProgressIndicator())
+                            ? const CircularProgressIndicator()
                             : SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
@@ -160,13 +136,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 15),
+                                    padding: const EdgeInsets.symmetric(vertical: 15),
                                   ),
                                   child: Text(
                                     'Enviar Link de Redefinição',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 20,
+                                      fontSize: 18,
                                       color: Colors.white,
                                     ),
                                   ),
@@ -178,8 +153,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

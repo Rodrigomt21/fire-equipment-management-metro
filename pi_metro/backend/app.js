@@ -5,6 +5,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt'); // Para hashing de senhas
 const crypto = require('crypto'); // Para geração de tokens seguros
 const nodemailer = require('nodemailer'); // Para envio de emails
+const schedule = require('node-schedule');
 
 const app = express();
 const port = 3000;
@@ -14,7 +15,6 @@ app.use(cors());
 app.use(express.json()); // Processa JSON do body
 app.use(express.urlencoded({ extended: true })); // Processa dados de formulário (opcional)
 
-// Conexão com o banco de dados MySQL
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -30,10 +30,9 @@ db.connect(err => {
     }
 });
 
-// Configuração do Nodemailer
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
+    port: parseInt(process.env.EMAIL_PORT, 10),
     secure: false, // true para 465, false para outras portas
     auth: {
         user: process.env.EMAIL_USER,
@@ -41,83 +40,137 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-// Registro de usuário
-app.post('/cadastro', async (req, res) => {
-    const { nomeCompleto, email, senha } = req.body;
+transporter.verify((error, success) => {
+    if (error) {
+        console.error('Erro ao conectar ao servidor SMTP:', error);
+    } else {
+        console.log('Conexão SMTP estabelecida com sucesso!');
+    }
+});
 
-    if (!nomeCompleto || !email || !senha || senha.length < 6) {
-        return res.status(400).json({ error: 'Dados inválidos ou senha muito curta.' });
+
+app.post('/cadastro', async (req, res) => {
+    console.log('Dados recebidos no cadastro:', req.body); // Log para verificar o corpo da requisição
+
+    const { nome, email, senha } = req.body;
+    const matricula = req.body.matricula || null;
+    const cargo_id = req.body.cargo_id || null;
+
+    if (!nome || !email || !senha || senha.length < 6) {
+        console.error('Erro: Dados inválidos ou incompletos.');
+        return res.status(400).json({ error: 'Nome, email e senha são obrigatórios e a senha deve ter pelo menos 6 caracteres.' });
     }
 
     try {
         const hashedPassword = await bcrypt.hash(senha, 10);
-        const sql = 'INSERT INTO users (nomeCompleto, email, senha) VALUES (?, ?, ?)';
+        const sql = `
+            INSERT INTO usuarios (nome, email, senha, matricula, cargo_id) 
+            VALUES (?, ?, ?, ?, ?)`;
 
-        db.query(sql, [nomeCompleto, email, hashedPassword], (err, result) => {
+        db.query(sql, [nome, email, hashedPassword, matricula, cargo_id], (err, result) => {
             if (err) {
-                console.error('Erro ao registrar usuário:', err);
-                return res.status(500).json({ error: 'Erro ao registrar usuário' });
+                console.error('Erro ao registrar usuário:', err.message);
+                if (err.code === 'ER_DUP_ENTRY') {
+                    const campo = err.sqlMessage.includes('email') ? 'email' : 'matricula';
+                    return res.status(400).json({ error: `O ${campo} já está em uso.` });
+                }
+                return res.status(500).json({ error: 'Erro ao registrar usuário.' });
             }
-            res.status(200).send('Usuário registrado com sucesso.');
+
+            console.log('Usuário registrado com sucesso:', result);
+            res.status(200).json({ message: 'Usuário registrado com sucesso.' });
         });
     } catch (err) {
-        console.error('Erro no servidor:', err);
-        res.status(500).json({ error: 'Erro no servidor' });
+        console.error('Erro no servidor:', err.message);
+        res.status(500).json({ error: 'Erro no servidor.' });
     }
 });
 
-// Buscar dados do usuário por email
-app.get('/usuario', (req, res) => {
-    const { email } = req.query;
-
-    if (!email) {
-        return res.status(400).json({ error: 'Email é obrigatório.' });
-    }
-
-    const sql = 'SELECT nomeCompleto FROM users WHERE email = ?';
-    db.query(sql, [email], (err, results) => {
-        if (err) {
-            console.error('Erro ao buscar usuário:', err);
-            return res.status(500).json({ error: 'Erro ao buscar usuário.' });
-        }
-
-        if (results.length === 0) {
-            return res.status(404).json({ error: 'Usuário não encontrado.' });
-        }
-
-        res.status(200).json({ nomeCompleto: results[0].nomeCompleto });
-    });
-});
 
 
-// Login
+
+// Buscar usuário
 app.post('/login', (req, res) => {
     const { email, senha } = req.body;
 
     if (!email || !senha) {
-        return res.status(400).json({ status: false, message: 'Email e senha são obrigatórios.' });
+        return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
     }
 
-    const sql = 'SELECT * FROM users WHERE email = ?';
-    db.query(sql, [email], (err, results) => {
+    const sql = 'SELECT * FROM usuarios WHERE email = ?';
+    db.query(sql, [email], async (err, results) => {
         if (err) {
             console.error('Erro ao buscar usuário:', err);
-            return res.status(500).json({ status: false, message: 'Erro no servidor ao buscar usuário' });
+            return res.status(500).json({ message: 'Erro no servidor.' });
         }
 
         if (results.length === 0) {
-            return res.status(401).json({ status: false, message: 'Credenciais inválidas.' });
+            return res.status(401).json({ message: 'Email ou senha incorretos.' });
         }
 
         const user = results[0];
-        bcrypt.compare(senha, user.senha, (err, isMatch) => {
-            if (err || !isMatch) {
-                return res.status(401).json({ status: false, message: 'Credenciais inválidas.' });
-            }
-            res.status(200).json({ status: true, message: 'Login bem-sucedido.', nomeCompleto: user.nomeCompleto });
+        const isPasswordMatch = await bcrypt.compare(senha, user.senha);
+
+        if (!isPasswordMatch) {
+            return res.status(401).json({ message: 'Email ou senha incorretos.' });
+        }
+
+        res.status(200).json({ nomeCompleto: user.nome });
+    });
+});
+
+
+// Atualizar notificações
+app.get('/notificacoes', (req, res) => {
+    const sql = `
+        SELECT n.id, n.mensagem, n.data_criacao, n.status
+        FROM notificacoes n
+        JOIN extintores e ON n.equipamento_id = e.Patrimonio
+        ORDER BY n.data_criacao DESC;
+    `;
+
+    db.query(sql, [], (err, resultados) => {
+        if (err) {
+            console.error('Erro ao buscar notificações:', err);
+            return res.status(500).json({ error: 'Erro ao buscar notificações.' });
+        }
+        res.status(200).json(resultados);
+    });
+});
+
+// Agendamento de notificações
+schedule.scheduleJob('0 8 * * *', () => {
+    const hoje = new Date();
+    const trintaDias = new Date();
+    const dezDias = new Date();
+    trintaDias.setDate(hoje.getDate() + 30);
+    dezDias.setDate(hoje.getDate() + 10);
+
+    const sql = `
+        SELECT e.Patrimonio, e.Tipo_ID, e.Data_Validade, l.nome AS Linha_Nome, u.email
+        FROM extintores e
+        LEFT JOIN localizacoes l ON e.ID_Localizacao = l.ID_Localizacao
+        LEFT JOIN usuarios u ON l.Linha_ID = u.id
+        WHERE e.Data_Validade BETWEEN ? AND ?
+    `;
+
+    db.query(sql, [hoje, trintaDias], (err, resultados) => {
+        if (err) {
+            return console.error('Erro ao buscar equipamentos:', err);
+        }
+
+        resultados.forEach(extintor => {
+            const mensagem = `Extintor ${extintor.Patrimonio} em ${extintor.Linha_Nome} está próximo do vencimento.`;
+            const inserirNotificacaoSql = `
+                INSERT INTO notificacoes (equipamento_id, mensagem)
+                VALUES (?, ?)`;
+            db.query(inserirNotificacaoSql, [extintor.Patrimonio, mensagem], (err) => {
+                if (err) return console.error('Erro ao inserir notificação:', err);
+            });
         });
     });
 });
+
 
 app.post('/forgot-password', (req, res) => {
     const { email } = req.body;
@@ -126,11 +179,11 @@ app.post('/forgot-password', (req, res) => {
         return res.status(400).json({ error: 'Email é obrigatório.' });
     }
 
-    const sql = 'SELECT * FROM users WHERE email = ?';
+    const sql = 'SELECT * FROM usuarios WHERE email = ?';
     db.query(sql, [email], (err, results) => {
         if (err) {
             console.error('Erro ao buscar email:', err);
-            return res.status(500).json({ error: 'Erro no servidor' });
+            return res.status(500).json({ error: 'Erro no servidor.' });
         }
 
         if (results.length === 0) {
@@ -138,14 +191,14 @@ app.post('/forgot-password', (req, res) => {
         }
 
         const token = crypto.randomBytes(20).toString('hex');
-        const tokenExpiration = new Date(Date.now() + 3600000); // 1 hora
+        const tokenExpiration = new Date(Date.now() + 3600000); // Expira em 1 hora
 
         const updateTokenSql = `
-            UPDATE users SET reset_password_token = ?, reset_password_expires = ? WHERE email = ?`;
+            UPDATE usuarios SET reset_password_token = ?, reset_password_expires = ? WHERE email = ?`;
         db.query(updateTokenSql, [token, tokenExpiration, email], (err) => {
             if (err) {
                 console.error('Erro ao salvar token:', err);
-                return res.status(500).json({ error: 'Erro ao salvar token de recuperação' });
+                return res.status(500).json({ error: 'Erro ao salvar token de recuperação.' });
             }
 
             const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
@@ -160,13 +213,14 @@ app.post('/forgot-password', (req, res) => {
             transporter.sendMail(mailOptions, (err) => {
                 if (err) {
                     console.error('Erro ao enviar email:', err);
-                    return res.status(500).json({ error: 'Erro ao enviar email' });
+                    return res.status(500).json({ error: 'Erro ao enviar email.' });
                 }
                 res.status(200).json({ message: 'Email de recuperação enviado.' });
             });
         });
     });
 });
+
 
 
 // Rota GET para exibir o formulário de redefinição de senha
@@ -213,108 +267,143 @@ app.post('/reset-password', async (req, res) => {
     const { token, newPassword } = req.body;
 
     if (!token || !newPassword || newPassword.length < 6) {
-        return res.send(`
-            <!DOCTYPE html>
-            <html lang="pt-BR">
-            <head>
-                <meta charset="UTF-8">
-                <title>Erro na Redefinição de Senha</title>
-                <style>
-                    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-                    .error { color: red; }
-                </style>
-            </head>
-            <body>
-                <h2 class="error">Token inválido ou senha muito curta.</h2>
-                <a href="/reset-password?token=${token}">Tente novamente</a>
-            </body>
-            </html>
-        `);
+        return res.status(400).json({ error: 'Token inválido ou senha muito curta.' });
     }
 
-    const sql = 'SELECT * FROM users WHERE reset_password_token = ? AND reset_password_expires > NOW()';
+    const sql = `
+        SELECT * FROM usuarios 
+        WHERE reset_password_token = ? 
+        AND reset_password_expires > NOW()`;
     db.query(sql, [token], async (err, results) => {
         if (err) {
             console.error('Erro ao buscar token:', err);
-            return res.send(`
-                <!DOCTYPE html>
-                <html lang="pt-BR">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Erro no Servidor</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-                        .error { color: red; }
-                    </style>
-                </head>
-                <body>
-                    <h2 class="error">Erro no servidor. Por favor, tente novamente mais tarde.</h2>
-                </body>
-                </html>
-            `);
+            return res.status(500).json({ error: 'Erro no servidor ao validar token.' });
         }
 
         if (results.length === 0) {
-            return res.send(`
-                <!DOCTYPE html>
-                <html lang="pt-BR">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Token Inválido ou Expirado</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-                        .error { color: red; }
-                    </style>
-                </head>
-                <body>
-                    <h2 class="error">Token inválido ou expirado.</h2>
-                    <a href="/forgot-password">Solicitar novo token</a>
-                </body>
-                </html>
-            `);
+            return res.status(400).json({ error: 'Token inválido ou expirado.' });
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         const updatePasswordSql = `
-            UPDATE users SET senha = ?, reset_password_token = NULL, reset_password_expires = NULL WHERE reset_password_token = ?`;
+            UPDATE usuarios 
+            SET senha = ?, reset_password_token = NULL, reset_password_expires = NULL 
+            WHERE reset_password_token = ?`;
         db.query(updatePasswordSql, [hashedPassword, token], (err) => {
             if (err) {
                 console.error('Erro ao atualizar senha:', err);
-                return res.send(`
-                    <!DOCTYPE html>
-                    <html lang="pt-BR">
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>Erro ao Atualizar Senha</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-                            .error { color: red; }
-                        </style>
-                    </head>
-                    <body>
-                        <h2 class="error">Erro ao atualizar senha. Tente novamente mais tarde.</h2>
-                    </body>
-                    </html>
-                `);
+                return res.status(500).json({ error: 'Erro ao atualizar senha.' });
             }
 
-            res.send(`
-                <!DOCTYPE html>
-                <html lang="pt-BR">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Senha Atualizada</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-                        .success { color: green; }
-                    </style>
-                </head>
-                <body>
-                    <h2 class="success">Senha atualizada com sucesso!</h2>
-                </body>
-                </html>
-            `);
+            // Sempre retornando JSON
+            res.status(200).json({
+                message: 'Sua senha foi atualizada com sucesso. Faça login novamente.',
+            });
         });
+    });
+});
+
+
+
+app.get('/notificacoes', (req, res) => {
+    const { userId } = req.query;
+
+    const sql = `
+    SELECT n.id, n.mensagem, n.data_criacao, n.status
+        FROM notificacoes n
+        JOIN equipamentequipamentos e ON n.equipamento_id = e.id
+        ORDER BY n.data_criacao DESC;
+    `;
+
+
+    db.query(sql, [userId], (err, resultados) => {
+        if (err) {
+            console.error('Erro ao buscar notificações:', err);
+            return res.status(500).json({ error: 'Erro ao buscar notificações.' });
+        }
+        res.status(200).json(resultados);
+    });
+});
+
+
+schedule.scheduleJob('0 8 * * *', () => {
+    const hoje = new Date();
+    const trintaDias = new Date();
+    const dezDias = new Date();
+    trintaDias.setDate(hoje.getDate() + 30);
+    dezDias.setDate(hoje.getDate() + 10);
+
+    const sql = `
+        SELECT e.id AS equipamento_id, e.nome AS equipamento_nome, e.proprietario_email, 
+               e.proxRecManut, e.proxRetEXT
+        FROM equipamentequipamentos e
+        WHERE e.proxRecManut BETWEEN ? AND ? 
+           OR e.proxRetEXT BETWEEN ? AND ?`;
+
+    db.query(sql, [hoje, trintaDias, hoje, dezDias], (err, resultados) => {
+        if (err) {
+            return console.error('Erro ao buscar equipamentos:', err);
+        }
+
+        resultados.forEach(equipamento => {
+            const { equipamento_id, equipamento_nome, proxRecManut, proxRetEXT, proprietario_email } = equipamento;
+
+            const mensagens = [];
+            if (proxRecManut && proxRecManut <= trintaDias) {
+                mensagens.push(`Manutenção do equipamento ${equipamento_nome} está prevista em 30 dias.`);
+            }
+            if (proxRetEXT && proxRetEXT <= dezDias) {
+                mensagens.push(`Equipamento ${equipamento_nome} está prestes a vencer.`);
+            }
+
+            mensagens.forEach(mensagem => {
+                // Inserir notificação no banco
+                const inserirNotificacaoSql = `
+                    INSERT INTO notificacoes (equipamento_id, mensagem)
+                    VALUES (?, ?)`;
+                db.query(inserirNotificacaoSql, [equipamento_id, mensagem], (err) => {
+                    if (err) return console.error('Erro ao inserir notificação:', err);
+                });
+
+                // Enviar e-mail
+                const mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: proprietario_email,
+                    subject: 'Notificação de Equipamento',
+                    text: mensagem,
+                };
+
+                transporter.sendMail(mailOptions, (err) => {
+                    if (err) return console.error('Erro ao enviar email:', err);
+                });
+            });
+        });
+    });
+});
+
+app.post('/notificacoes/:id/markAsRead', (req, res) => {
+    const { id } = req.params;
+    const sql = `UPDATE notificacoes SET status = 'lida' WHERE id = ?`;
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Erro ao marcar notificação como lida:', err);
+            return res.status(500).json({ error: 'Erro ao marcar notificação como lida.' });
+        }
+        res.status(200).json({ message: 'Notificação marcada como lida.' });
+    });
+});
+
+app.post('/notificacoes/:id/markAsUnread', (req, res) => {
+    const { id } = req.params;
+    const sql = `UPDATE notificacoes SET status = 'não lida' WHERE id = ?`;
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Erro ao marcar notificação como não lida:', err);
+            return res.status(500).json({ error: 'Erro ao marcar notificação como não lida.' });
+        }
+        res.status(200).json({ message: 'Notificação marcada como não lida.' });
     });
 });
 
