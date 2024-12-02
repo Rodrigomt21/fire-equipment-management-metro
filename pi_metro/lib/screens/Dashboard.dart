@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pi_metro/screens/Opcoes_Dashboard/Tela_Notificacao.dart';
-import 'package:pi_metro/screens/Telas_Relatorios/relatorios_screen.dart';
+import 'package:pi_metro/screens/Opcoes_Dashboard/Tela_Relatorio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Dashboard extends StatefulWidget {
@@ -180,7 +180,7 @@ class _DashboardState extends State<Dashboard> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const RelatoriosScreen()),
+                              builder: (context) =>  RelatoriosScreen()),
                         );
                       },
                     ),
