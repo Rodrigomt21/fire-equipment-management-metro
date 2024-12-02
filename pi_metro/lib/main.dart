@@ -12,6 +12,12 @@ import 'screens/forgot_password_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'screens/welcome_dashboard.dart';
 import 'screens/linha_opcoes.dart'; // Nova tela de opções para a linha
+import 'screens/extintores_por_localizacao_screen.dart'; // Nova tela para o gráfico
+import 'screens/relatorios_screen.dart';
+import 'screens/manutencao_preventiva_screen.dart';
+import 'screens/localizacao_extintores_screen.dart';
+import 'screens/vencimento_extintores_screen.dart';
+import 'screens/status_screen.dart';
 import 'services/user_provider.dart';
 
 class MyCustomPageRoute<T> extends MaterialPageRoute<T> {
@@ -135,12 +141,22 @@ class _MyAppState extends State<MyApp> {
                 cargoUsuario: 'Administrador',
               ),
             );
-          case '/linha-opcoes': // Adicionada nova rota
+          case '/linha-opcoes':
             final args = settings.arguments as Map<String, String>;
             final linha = args['linha'] ?? 'Linha Não Definida';
             return MyCustomPageRoute(
               builder: (_) => LinhaOpcoesScreen(linhaSelecionada: linha),
             );
+          case '/relatorios':
+            return MyCustomPageRoute(builder: (_) => const RelatoriosScreen());
+          case '/manutencao-preventiva':
+            return MyCustomPageRoute(builder: (_) => ManutencaoPreventivaScreen());
+          case '/localizacao-extintores':
+            return MyCustomPageRoute(builder: (_) => LocalizacaoExtintoresScreen());
+          case '/vencimento-extintores':
+            return MyCustomPageRoute(builder: (_) => VencimentoExtintoresScreen());
+          case '/status':
+            return MyCustomPageRoute(builder: (_) => StatusScreen());
           default:
             return null;
         }
