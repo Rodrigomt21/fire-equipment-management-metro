@@ -24,7 +24,7 @@ class LinhaOpcoesScreen extends StatelessWidget {
         children: [
           Positioned.fill(
             child: Image.asset(
-              'lib/imgs/mapa_metro.png', // Substitua pelo caminho correto do mapa
+              'lib/imgs/trilhos.png', // Substitua pelo caminho correto do mapa
               fit: BoxFit.cover,
             ),
           ),
