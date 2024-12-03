@@ -43,7 +43,7 @@ class _RegistrarProblemaExtintorPageState
   Future<void> _fetchProblemas() async {
     try {
       final response =
-          await http.get(Uri.parse('http://10.0.2.2:3001/problemas'));
+          await http.get(Uri.parse('http://localhost:3001/problemas'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
@@ -60,7 +60,7 @@ class _RegistrarProblemaExtintorPageState
   Future<void> _fetchStatus() async {
     try {
       final response =
-          await http.get(Uri.parse('http://10.0.2.2:3001/status'));
+          await http.get(Uri.parse('http://localhost:3001/status'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
@@ -97,7 +97,7 @@ class _RegistrarProblemaExtintorPageState
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3001/registrar_problema'),
+        Uri.parse('http://localhost:3001/registrar_problema'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(problemaData),
       );
@@ -121,7 +121,7 @@ class _RegistrarProblemaExtintorPageState
       String patrimonio, String? statusSelecionado) async {
     try {
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:3001/atualizar_status_extintor'),
+        Uri.parse('http://localhost:3001/atualizar_status_extintor'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "patrimonio": patrimonio,
