@@ -47,9 +47,9 @@ class _TelaReportarErroState extends State<TelaReportarErro> {
         _mostrarDialogo('Erro', 'Falha ao reportar o erro: ${response.body}');
       }
 
-      _controller.clear(); // Limpa o campo de texto após o envio
+      _controller.clear(); 
     } else {
-      // Caso o campo esteja vazio, avisa o usuário
+      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, descreva o erro.')),
       );
@@ -67,7 +67,7 @@ class _TelaReportarErroState extends State<TelaReportarErro> {
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                Navigator.of(context).pop(); // Fecha o diálogo
+                Navigator.of(context).pop(); 
               },
             ),
           ],
@@ -87,7 +87,7 @@ class _TelaReportarErroState extends State<TelaReportarErro> {
         centerTitle: true,
         elevation: 4,
         iconTheme: const IconThemeData(
-            color: Color(0xFFD9D9D9)), // Cor da seta (ícone de voltar)
+            color: Color(0xFFD9D9D9)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

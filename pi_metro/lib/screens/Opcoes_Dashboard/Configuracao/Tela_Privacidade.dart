@@ -12,29 +12,29 @@ class TelaPrivacidade extends StatelessWidget {
           'Privacidade',
           style: TextStyle(
             fontWeight : FontWeight.bold,
-            color: Color(0xFFD9D9D9), // Cor do título
+            color: Color(0xFFD9D9D9), 
           ),
         ),
         backgroundColor: const Color(0xFF011689),
         centerTitle: true,
         elevation: 4,
         iconTheme:
-            const IconThemeData(color: Color(0xFFD9D9D9)), // Cor do ícone
+            const IconThemeData(color: Color(0xFFD9D9D9)), 
       ),
       body: SingleChildScrollView(
-        // Adicionando rolagem
+        
         child: Padding(
-          padding: const EdgeInsets.all(16.0), // Adicionando margem externa
+          padding: const EdgeInsets.all(16.0), 
           child: Column(
             crossAxisAlignment:
-                CrossAxisAlignment.start, // Alinhando o conteúdo à esquerda
+                CrossAxisAlignment.start, 
             children: [
-              // Retângulo com texto
+              
               Container(
                 padding:
                     const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD9D9D9), // Fundo cinza
+                  color: const Color(0xFFD9D9D9), 
                   borderRadius: BorderRadius.circular(8.0),
                   boxShadow: [
                     BoxShadow(
@@ -48,14 +48,14 @@ class TelaPrivacidade extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text(
-                      'Termos de Uso e Política de Privacidade', // Título em negrito
+                      'Termos de Uso e Política de Privacidade', 
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
                     ),
-                    SizedBox(height: 8), // Espaço entre os textos
+                    SizedBox(height: 8), 
                     Text(
                       '''Bem-vindo ao aplicativo de Gestão de Extintores de Incêndio do Metro de SP. Este documento estabelece os termos e condições para o uso do aplicativo, bem como a política de privacidade referente ao tratamento de dados coletados.
 1. Termos de Uso
@@ -89,27 +89,27 @@ Ao usar este aplicativo, você concorda com os termos descritos acima. Caso não
                         fontSize: 18,
                         fontWeight: FontWeight.normal,
                         color: Colors.black87,
-                        height: 1.3, // Diminuindo o espaçamento entre as linhas
+                        height: 1.3, 
                       ),
-                      textAlign: TextAlign.left, // Alinhando o texto à esquerda
+                      textAlign: TextAlign.left, 
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              // Logo opaca centralizada na parte inferior
+              
               Center(
                 child: Opacity(
                   opacity: 0.2,
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width *
-                        0.5, // 50% da largura
+                        0.5, 
                     height: MediaQuery.of(context).size.height *
-                        0.1, // 10% da altura
+                        0.1, 
                     child: FittedBox(
-                      fit: BoxFit.contain, // Ajusta a imagem sem distorção
+                      fit: BoxFit.contain, 
                       child: Image.asset(
-                        'lib/imgs/logo.jpeg', // Caminho da imagem
+                        'lib/imgs/logo.jpeg', 
                       ),
                     ),
                   ),

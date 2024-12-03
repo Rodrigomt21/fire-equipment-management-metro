@@ -40,7 +40,7 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
 
     try {
       final url = Uri.parse(
-          'http://localhost:3000/patrimonio'); // Substitua localhost pelo IP da sua máquina
+          'http://localhost:3000/patrimonio'); 
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -93,7 +93,7 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
     });
 
     final url = Uri.parse(
-        'http://localhost:3000/extintor/$_patrimonio'); // Substitua localhost pelo IP da sua máquina
+        'http://localhost:3000/extintor/$_patrimonio'); 
 
     try {
       final response = await http.get(url);

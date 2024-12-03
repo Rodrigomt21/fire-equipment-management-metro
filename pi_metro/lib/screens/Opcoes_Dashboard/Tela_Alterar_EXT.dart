@@ -135,10 +135,14 @@ class _TelaEditarExtintorState extends State<TelaEditarExtintor> {
 
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:3000/extintor/${widget.patrimonio}'),
+        Uri.parse(
+            'http://<SEU_IP_LOCAL>:3000/extintor/${widget.patrimonio}'), 
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(extintorData),
       );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         _showSuccessDialog('Extintor atualizado com sucesso!');

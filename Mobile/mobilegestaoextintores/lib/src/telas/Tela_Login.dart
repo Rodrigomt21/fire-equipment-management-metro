@@ -243,7 +243,7 @@ class _TelaLoginState extends State<TelaLogin> {
   Future<void> _login(BuildContext context) async {
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:3001/login'),
+        Uri.parse('http://10.2.0.32:3001/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': _emailController.text,
@@ -293,7 +293,7 @@ class _TelaLoginState extends State<TelaLogin> {
 
   // Future<void> _login(BuildContext context) async {
   //   final response = await http.post(
-  //     Uri.parse('http://localhost:3001/login'),
+  //     Uri.parse('http://10.2.0.32:3001/login'),
   //     headers: {'Content-Type': 'application/json'},
   //     body: jsonEncode({
   //       'email': _emailController.text,

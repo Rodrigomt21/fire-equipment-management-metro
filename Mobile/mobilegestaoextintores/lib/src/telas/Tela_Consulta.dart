@@ -40,7 +40,7 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
 
     try {
       final url = Uri.parse(
-          'http://localhost:3001/patrimonio'); // Substitua localhost pelo IP da sua máquina
+          'http://10.2.0.32:3001/patrimonio'); // Substitua 10.2.0.32 pelo IP da sua máquina
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -93,7 +93,7 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
     });
 
     final url = Uri.parse(
-        'http://localhost:3001/extintor/$_patrimonio'); // Substitua localhost pelo IP da sua máquina
+        'http://10.2.0.32:3001/extintor/$_patrimonio'); // Substitua 10.2.0.32 pelo IP da sua máquina
 
     try {
       final response = await http.get(url);
@@ -338,7 +338,7 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
 
     final qrCodeImageUrl = qrCodeUrl.startsWith('http')
         ? qrCodeUrl
-        : 'http://localhost:3001/$qrCodeUrl';
+        : 'http://10.2.0.32:3001/$qrCodeUrl';
 
     return Image.network(
       qrCodeImageUrl,

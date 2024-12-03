@@ -12,7 +12,7 @@ class TelaConta extends StatefulWidget {
 }
 
 class _TelaContaState extends State<TelaConta> {
-  XFile? _imagemSelecionada; // Para armazenar a imagem selecionada
+  XFile? _imagemSelecionada; 
   String nome = 'Carregando...';
   String matricula = 'Carregando...';
   String cargo = 'Carregando...';
@@ -33,30 +33,30 @@ class _TelaContaState extends State<TelaConta> {
         nome = 'Erro ao carregar';
         matricula = 'Erro ao carregar';
         cargo = 'Erro ao carregar';
-        _imagemSelecionada = null; // Adicionado
+        _imagemSelecionada = null; 
       });
       return;
     }
 
     try {
       final response = await http
-          .get(Uri.parse('http://localhost:3001/usuario?email=$email'));
+          .get(Uri.parse('http://10.2.0.32:3001/usuario?email=$email'));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('Dados do usuário: $data'); // Log para depuração
+        print('Dados do usuário: $data'); 
 
         setState(() {
           nome = data['nome'] ?? 'Nome não encontrado';
           matricula = data['matricula'] ?? 'Matrícula não encontrada';
           cargo = data['cargo'] ?? 'Cargo não encontrado';
-          usuarioId = data['id'] ?? 0; // Atribui 0 caso o id seja nulo
-          // Carregar a imagem do perfil
+          usuarioId = data['id'] ?? 0; 
+          
           if (data['foto_perfil'] != null) {
             _imagemSelecionada =
-                XFile(data['foto_perfil']); // Se for um caminho local
+                XFile(data['foto_perfil']); 
           } else {
-            _imagemSelecionada = null; // Se não houver imagem, defina como nulo
+            _imagemSelecionada = null; 
           }
         });
       } else {
@@ -66,7 +66,7 @@ class _TelaContaState extends State<TelaConta> {
           nome = 'Erro ao carregar: $errorMessage';
           matricula = 'Erro ao carregar: $errorMessage';
           cargo = 'Erro ao carregar: $errorMessage';
-          _imagemSelecionada = null; // Se houver erro, defina como nulo
+          _imagemSelecionada = null; 
         });
       }
     } catch (e) {
@@ -74,13 +74,13 @@ class _TelaContaState extends State<TelaConta> {
         nome = 'Erro ao carregar';
         matricula = 'Erro ao carregar';
         cargo = 'Erro ao carregar';
-        _imagemSelecionada = null; // Se houver erro, defina como nulo
+        _imagemSelecionada = null; 
       });
-      print('Erro ao buscar usuário: $e'); // Log para depuração
+      print('Erro ao buscar usuário: $e'); 
     }
   }
 
-  // Método para selecionar e enviar a imagem
+  
   Future<void> _uploadImagem(int usuarioId) async {
     final picker = ImagePicker();
     final XFile? imagem = await picker.pickImage(source: ImageSource.gallery);
@@ -88,39 +88,39 @@ class _TelaContaState extends State<TelaConta> {
     if (imagem != null) {
       final bytes = await imagem.readAsBytes();
 
-      var uri = Uri.parse('http://localhost:3001/upload');
+      var uri = Uri.parse('http://10.2.0.32:3001/upload');
       var request = http.MultipartRequest('POST', uri);
 
-      // Enviando a imagem
+      
       request.files.add(http.MultipartFile.fromBytes(
-        'image', // O nome do campo para a imagem
+        'image', 
         bytes,
         filename: imagem.name,
       ));
 
-      // Enviando o ID do usuário
+      
       request.fields['usuario_id'] = usuarioId.toString();
 
-      // Enviar a requisição para o servidor
+      
       var response = await request.send();
 
       if (response.statusCode == 200) {
         print('Imagem salva com sucesso!');
         setState(() {
-          _imagemSelecionada = imagem; // Atualiza a imagem local
+          _imagemSelecionada = imagem; 
         });
-        // Recarregar os dados do usuário para garantir que a imagem mais recente seja exibida
+        
         await _buscarUsuario();
       } else {
         print('Falha ao salvar a imagem. Status: ${response.statusCode}');
         final responseBody = await response.stream
-            .bytesToString(); // Captura o corpo da resposta
-        print('Resposta do servidor: $responseBody'); // Log para depuração
+            .bytesToString(); 
+        print('Resposta do servidor: $responseBody'); 
       }
     }
   }
 
-  // Método para trocar a foto de perfil
+  
   Future<void> _trocarFotoPerfil() async {
     await _uploadImagem(usuarioId);
   }
@@ -144,7 +144,7 @@ class _TelaContaState extends State<TelaConta> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             GestureDetector(
-              onTap: _trocarFotoPerfil, // Chama o método para trocar a foto
+              onTap: _trocarFotoPerfil, 
               child: Stack(
                 alignment: Alignment.bottomRight,
                 children: [
@@ -158,7 +158,7 @@ class _TelaContaState extends State<TelaConta> {
     key: ValueKey<String>(_imagemSelecionada?.path ?? 'default'),
     radius: 60,
     backgroundImage: _imagemSelecionada != null
-        ? NetworkImage(_imagemSelecionada!.path) // Usar NetworkImage para URLs
+        ? NetworkImage(_imagemSelecionada!.path) 
         : const AssetImage('assets/images/default_profile.png') as ImageProvider,
 ),
                   ),
@@ -172,7 +172,7 @@ class _TelaContaState extends State<TelaConta> {
             ),
             const SizedBox(height: 10),
             TextButton(
-              onPressed: _trocarFotoPerfil, // Chama o método implementado
+              onPressed: _trocarFotoPerfil, 
               child: const Text(
                 'Trocar Foto de Perfil',
                 style: TextStyle(

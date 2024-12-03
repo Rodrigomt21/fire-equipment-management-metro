@@ -56,8 +56,8 @@ db.connect((err) => {
         return;
     }
     console.log('Conectado ao banco de dados MySQL');
-    inserirUsuario('Lucas Silva', 'lucasbarboza299@gmail.com', 'senha123', 'MT00077', 2);
-    inserirUsuario('Fernanda Beatriz', 'febiatx@gmail.com', 'senha123', 'MT00018', 2); // Altere os parâmetros conforme necessário
+    // inserirUsuario('Lucas Silva', 'lucasbarboza299@gmail.com', 'senha123', 'MT00077', 2);
+    // inserirUsuario('Fernanda Beatriz', 'febiatx@gmail.com', 'senha123', 'MT00018', 2); // Altere os parâmetros conforme necessário
 
 });
 
@@ -79,7 +79,7 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 const gerarSalvarQRCode = async (patrimonio) => {
-    const qrCodeData = `http://localhost:3001/pdf/${patrimonio}`; // Link para o PDF do extintor
+    const qrCodeData = `http://10.2.0.32:3001/pdf/${patrimonio}`; // Link para o PDF do extintor
     const qrCodePath = path.join(uploadsDir, `${patrimonio}-qrcode.png`);
 
     await QRCode.toFile(qrCodePath, qrCodeData);
@@ -593,7 +593,7 @@ app.get('/extintor/:patrimonio', (req, res) => {
         }
 
         const extintor = results[0];
-        extintor.QR_Code = `http://localhost:3001/uploads/${patrimonio}-qrcode.png`;
+        extintor.QR_Code = `http://10.2.0.32:3001/uploads/${patrimonio}-qrcode.png`;
         console.log('Dados do extintor:', extintor);
         res.status(200).json({ success: true, extintor });
     });
@@ -856,7 +856,7 @@ app.post('/forgot-password', (req, res) => {
                 return res.status(500).json({ error: 'Erro no servidor ao salvar token de recuperação' });
             }
 
-            const resetUrl = `http://localhost:3001/reset-password?token=${token}`; const mailOptions = {
+            const resetUrl = `http://10.2.0.32:3001/reset-password?token=${token}`; const mailOptions = {
                 from: 'suporte.redefinir.senha.imt.pi@gmail.com',
                 to: email,
                 subject: 'Recuperação de senha',
