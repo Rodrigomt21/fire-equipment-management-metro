@@ -184,7 +184,7 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
           DropdownButtonFormField<String>(
             decoration: InputDecoration(
               labelText: 'Selecione o Patrimônio',
-              labelStyle: const TextStyle(color: Color(0xFF011689)),
+              labelStyle: const TextStyle(color: Colors.black),
               filled: true,
               fillColor: const Color(0xFFF7F9FC),
               border: OutlineInputBorder(
@@ -212,7 +212,7 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
             controller: _patrimonioController,
             decoration: InputDecoration(
               labelText: 'Ou digite o número do Patrimônio',
-              labelStyle: const TextStyle(color: Color(0xFF011689)),
+              labelStyle: const TextStyle(color: Colors.black),
               filled: true,
               fillColor: const Color(0xFFF7F9FC),
               border: OutlineInputBorder(
@@ -220,7 +220,7 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
                 borderSide: BorderSide.none,
               ),
               hintText: 'Digite ou selecione acima',
-              prefixIcon: const Icon(Icons.edit, color: Color(0xFF011689)),
+              hintStyle: const TextStyle(color: Colors.black),
             ),
             keyboardType: TextInputType.number,
             onChanged: (value) {
@@ -244,7 +244,7 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
                 ? const CircularProgressIndicator(color: Colors.white)
                 : const Text(
                     'Buscar Extintor',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Color(0xFFD9D9D9),fontSize: 16, fontWeight: FontWeight.bold),
                   ),
           ),
         ],
