@@ -477,7 +477,7 @@ class _TelaAtualizarExtintorState extends State<TelaAtualizarExtintor> {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: const Color(0xFFE3F2FD),
+        fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide:
@@ -516,7 +516,7 @@ class _TelaAtualizarExtintorState extends State<TelaAtualizarExtintor> {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: const Color(0xFFE3F2FD),
+        fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide:

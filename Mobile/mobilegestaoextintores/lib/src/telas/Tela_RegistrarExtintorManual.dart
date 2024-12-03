@@ -273,7 +273,7 @@ class _TelaRegistrarExtintorState extends State<TelaRegistrarExtintor> {
         labelText: label,
         labelStyle: const TextStyle(color: Colors.black),
         filled: true,
-        fillColor: const Color(0xFFF4F4F9),
+        fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,
@@ -296,7 +296,7 @@ class _TelaRegistrarExtintorState extends State<TelaRegistrarExtintor> {
         labelText: label,
         labelStyle: const TextStyle(color: Colors.black),
         filled: true,
-        fillColor: const Color(0xFFF4F4F9),
+        fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,

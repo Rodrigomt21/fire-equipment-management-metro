@@ -261,10 +261,13 @@ class _RegistrarProblemaExtintorPageState
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _registrarProblema,
-                    child: const Text('Registrar Problema'),
+                    child: const Text('Registrar Problema', style: TextStyle(color: Color(0xFFD9D9D9)),),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF011689),
-                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 45),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       textStyle: const TextStyle(fontSize: 16),
                     ),
                   ),
@@ -352,7 +355,7 @@ class _RegistrarProblemaExtintorPageState
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.blueAccent),
+        labelStyle: const TextStyle(color: Colors.black),
         border: OutlineInputBorder(),
         filled: true,
         fillColor: Colors.white,
@@ -367,7 +370,11 @@ class _RegistrarProblemaExtintorPageState
       items: problemaOptions.map((problema) {
         return DropdownMenuItem<String>(
           value: problema,
-          child: Text(problema),
+          child: Text(
+            problema,
+            style: const TextStyle(
+                color: Colors.black), // Define a cor do texto como preto
+          ),
         );
       }).toList(),
       onChanged: (value) {
@@ -377,7 +384,7 @@ class _RegistrarProblemaExtintorPageState
       },
       decoration: InputDecoration(
         labelText: 'Selecione o Problema',
-        labelStyle: const TextStyle(color: Colors.blueAccent),
+        labelStyle: const TextStyle(color: Colors.black),
         border: OutlineInputBorder(),
         filled: true,
         fillColor: Colors.white,
@@ -385,13 +392,18 @@ class _RegistrarProblemaExtintorPageState
     );
   }
 
+
   Widget _buildStatusDropdown() {
     return DropdownButtonFormField<String>(
       value: _statusSelecionado,
       items: statusOptions.map((status) {
         return DropdownMenuItem<String>(
           value: status['nome'],
-          child: Text(status['nome']),
+          child: Text(
+            status['nome'],
+            style: const TextStyle(
+                color: Colors.black), // Define a cor do texto como preto
+          ),
         );
       }).toList(),
       onChanged: (value) {
@@ -401,7 +413,7 @@ class _RegistrarProblemaExtintorPageState
       },
       decoration: InputDecoration(
         labelText: 'Selecione o Status',
-        labelStyle: const TextStyle(color: Colors.blueAccent),
+        labelStyle: const TextStyle(color: Colors.black),
         border: OutlineInputBorder(),
         filled: true,
         fillColor: Colors.white,
