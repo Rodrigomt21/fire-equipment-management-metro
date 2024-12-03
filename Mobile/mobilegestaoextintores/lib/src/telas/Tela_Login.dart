@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobilegestaoextintores/src/telas/Redefinir_Senha/Tela_Esqueceu_Senha.dart';
 import 'dart:convert';
 import 'package:mobilegestaoextintores/src/telas/TelaPrincipal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,12 +19,32 @@ class _TelaLoginState extends State<TelaLogin> {
   String _errorMessage = '';
 
   @override
+  void initState() {
+    super.initState();
+    _verificarUsuarioSalvo();
+  }
+
+  Future<void> _verificarUsuarioSalvo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final logado = prefs.getBool('usuario_logado') ?? false;
+
+    if (logado) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const TelaPrincipal(),
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final imageHeight = screenHeight * 0.1;
 
     return Scaffold(
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -79,7 +100,13 @@ class _TelaLoginState extends State<TelaLogin> {
                       _buildPasswordField(),
                       const SizedBox(height: 20),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => TelaEsqueceuSenha()),
+                          );
+                        },
                         child: const Text(
                           'Esqueceu a senha?',
                           style:
@@ -117,7 +144,7 @@ class _TelaLoginState extends State<TelaLogin> {
                 height: MediaQuery.of(context).size.height * 0.1,
               ),
               Transform.translate(
-                offset: Offset(-20, 0),
+                offset: const Offset(-20, 0),
                 child: Image.asset(
                   'assets/images/pilar_metro_2.jpeg',
                   width: MediaQuery.of(context).size.width * 0.1,
@@ -214,41 +241,97 @@ class _TelaLoginState extends State<TelaLogin> {
   }
 
   Future<void> _login(BuildContext context) async {
-  final email = _emailController.text;
-  final password = _passwordController.text;
-
-  final response = await http.post(
-    Uri.parse('http://localhost:3001/login'), 
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({'email': email, 'password': password}),
-  );
-
-  if (response.statusCode == 200) {
-    final responseData = jsonDecode(response.body);
-    print('Resposta da API: $responseData');
-
-    if (responseData['success']) {
-      final nomeUsuario = responseData['nome'] ?? 'Usuário';
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('usuario_email', email); 
-      print("Nome do Usuário: $nomeUsuario");
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => TelaPrincipal(nomeUsuario: nomeUsuario),
-        ),
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:3001/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': _emailController.text,
+          'password': _passwordController.text,
+        }),
       );
-    } else {
-      setState(() {
-        _errorMessage = responseData['message'] ?? 'Erro desconhecido';
-      });
-    }
-  } else {
-    print('Erro na requisição: ${response.statusCode} - ${response.body}');
-    setState(() {
-      _errorMessage = 'Erro ao se conectar ao servidor';
-    });
-  }
-}
 
+      print('Resposta da API: ${response.body}');
+      print('Código de status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data['success'] == true) {
+          final prefs = await SharedPreferences.getInstance();
+          prefs.setString('usuario_email', _emailController.text);
+          prefs.setBool('usuario_logado', true);
+
+          // Salva o nome do usuário
+          prefs.setString('usuario_nome', data['nome']);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const TelaPrincipal(),
+            ),
+          );
+        } else {
+          print('Erro no servidor: ${data['message']}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erro no login: ${data['message']}')),
+          );
+        }
+      } else {
+        print('Erro de conexão: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro de conexão com o servidor')),
+        );
+      }
+    } catch (e) {
+      print('Erro ao tentar realizar login: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro inesperado ao fazer login')),
+      );
+    }
+  }
+
+  // Future<void> _login(BuildContext context) async {
+  //   final response = await http.post(
+  //     Uri.parse('http://localhost:3001/login'),
+  //     headers: {'Content-Type': 'application/json'},
+  //     body: jsonEncode({
+  //       'email': _emailController.text,
+  //       'password': _passwordController.text,
+  //     }),
+  //   );
+
+  //   print('Resposta da API: ${response.body}');
+  //   print('Código de status: ${response.statusCode}');
+
+  //   if (response.statusCode == 200) {
+  //     final data = jsonDecode(response.body);
+
+  //     if (data['success'] == true) {
+  //       final prefs = await SharedPreferences.getInstance();
+  //       prefs.setString('usuario_email', _emailController.text);
+  //       prefs.setBool('usuario_logado', true);
+
+  //       // Salva o nome do usuário
+  //       prefs.setString('usuario_nome', data['nome']);
+
+  //       Navigator.pushReplacement(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) => const TelaPrincipal(),
+  //         ),
+  //       );
+  //     } else {
+  //       print('Erro no servidor: ${data['message']}');
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Erro no login: ${data['message']}')),
+  //       );
+  //     }
+  //   } else {
+  //     print('Erro de conexão: ${response.statusCode}');
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Erro de conexão com o servidor')),
+  //     );
+  //   }
+  // }
 }
