@@ -81,7 +81,7 @@ class _TelaConsultaLocalizacaoExtintorState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color(0xFFD9D9D9),
       appBar: AppBar(
         title: const Text('Consulta de Localização do Extintor',
         style: TextStyle(

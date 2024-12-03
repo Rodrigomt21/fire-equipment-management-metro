@@ -274,6 +274,7 @@ class _TelaAtualizarExtintorState extends State<TelaAtualizarExtintor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFD9D9D9),
       appBar: AppBar(
         title: const Text('Atualizar Extintor',
         style: TextStyle(

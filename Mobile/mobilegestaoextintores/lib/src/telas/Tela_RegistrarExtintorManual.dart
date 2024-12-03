@@ -339,6 +339,7 @@ class _TelaRegistrarExtintorState extends State<TelaRegistrarExtintor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFD9D9D9),
       appBar: AppBar(
         title: const Text('Registrar Extintor',
           style: TextStyle(
@@ -349,7 +350,7 @@ class _TelaRegistrarExtintorState extends State<TelaRegistrarExtintor> {
         foregroundColor: const Color(0xFFD9D9D9),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Colors.white,
+          color: Color(0xFFD9D9D9),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -359,7 +360,7 @@ class _TelaRegistrarExtintorState extends State<TelaRegistrarExtintor> {
           child: Center(
             child: Card(
               elevation: 5,
-              color: Colors.white,
+              color: Color(0xFFD9D9D9),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -486,7 +487,7 @@ class _TelaRegistrarExtintorState extends State<TelaRegistrarExtintor> {
                       ),
                       child: const Text(
                         'Registrar',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: Color(0xFFD9D9D9)),
                       ),
                     ),
                     const SizedBox(height: 20),

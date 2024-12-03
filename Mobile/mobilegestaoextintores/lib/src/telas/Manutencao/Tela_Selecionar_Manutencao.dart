@@ -7,6 +7,7 @@ class TelaSelecaoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFD9D9D9),
       appBar: AppBar(
         title: const Text("Selecione uma Opção",
           style: TextStyle(

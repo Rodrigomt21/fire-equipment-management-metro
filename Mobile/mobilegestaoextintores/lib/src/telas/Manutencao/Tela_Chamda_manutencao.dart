@@ -191,6 +191,7 @@ class _RegistrarProblemaExtintorPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFD9D9D9),
       appBar: AppBar(
         title: const Text("Registrar Problema no Extintor",
         style: TextStyle(

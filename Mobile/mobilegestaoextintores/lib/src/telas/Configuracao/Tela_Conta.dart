@@ -128,7 +128,7 @@ class _TelaContaState extends State<TelaConta> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFD9D9D9),
       appBar: AppBar(
         title: const Text('Minha Conta',
             style: TextStyle(
