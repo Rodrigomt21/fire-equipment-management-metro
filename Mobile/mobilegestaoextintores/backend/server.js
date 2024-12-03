@@ -750,7 +750,6 @@ app.get('/capacidades', (req, res) => {
 });
 
 // Endpoint para buscar a localização do extintor
-// Endpoint para buscar a localização do extintor
 app.get('/extintor/localizacao/:patrimonio', (req, res) => {
     const patrimonio = req.params.patrimonio;
 
@@ -781,27 +780,6 @@ app.get('/extintor/localizacao/:patrimonio', (req, res) => {
     });
 });
 
-const verificarValidadeExtintores = async () => {
-    const hoje = moment();
-    const diasParaAviso = 7; // Número de dias antes da validade para enviar a notificação
-    const dataLimite = hoje.add(diasParaAviso, 'days').format('YYYY-MM-DD');
-
-    const query = `
-        SELECT Patrimonio, DATEDIFF(Data_Validade, ?) AS DiasRestantes, TokenDispositivo
-        FROM Extintores
-        WHERE Data_Validade BETWEEN ? AND ?
-    `;
-
-    try {
-        const [resultados] = await db.promise().query(query, [hoje.format('YYYY-MM-DD'), hoje.format('YYYY-MM-DD'), dataLimite]);
-
-        for (const extintor of resultados) {
-            await enviarNotificacao(extintor.TokenDispositivo, extintor.Patrimonio, extintor.DiasRestantes);
-        }
-    } catch (error) {
-        console.error('Erro ao verificar validade dos extintores:', error);
-    }
-};
 
 async function atualizarStatusExtintores() {
     const hoje = moment().format('YYYY-MM-DD'); // Data atual formatada

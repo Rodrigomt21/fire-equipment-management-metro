@@ -4,6 +4,8 @@ import 'package:email_validator/email_validator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class CadastroPage extends StatefulWidget {
   const CadastroPage({super.key});
 
@@ -15,7 +17,8 @@ class _CadastroPageState extends State<CadastroPage> {
   final TextEditingController nomeCompletoController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
@@ -52,8 +55,7 @@ class _CadastroPageState extends State<CadastroPage> {
                     if (isPassword) {
                       _isPasswordVisible = !_isPasswordVisible;
                     } else if (isConfirmPassword) {
-                      _isConfirmPasswordVisible =
-                          !_isConfirmPasswordVisible;
+                      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
                     }
                   });
                 },
@@ -259,7 +261,8 @@ class _CadastroPageState extends State<CadastroPage> {
 
     if (!_isPasswordValid(password)) {
       setState(() {
-        errorMessage = 'A senha deve conter pelo menos 6 caracteres, uma letra maiúscula e um caractere especial.';
+        errorMessage =
+            'A senha deve conter pelo menos 6 caracteres, uma letra maiúscula e um caractere especial.';
       });
       return;
     }
@@ -282,13 +285,23 @@ class _CadastroPageState extends State<CadastroPage> {
 
         if (userResponse.statusCode == 200) {
           final userData = jsonDecode(userResponse.body);
-          final nomeUsuario = userData['nomeCompleto'];
+          if (userData['success']) {
+            final nomeUsuario = userData['nome'];
 
-          Navigator.pushReplacementNamed(
-            context,
-            '/welcome-dashboard',
-            arguments: {'nomeUsuario': nomeUsuario},
-          );
+            // Armazenar o nome do usuário no SharedPreferences
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('nomeUsuario', nomeUsuario);
+
+            Navigator.pushReplacementNamed(
+              context,
+              '/welcome-dashboard',
+              arguments: {'nomeUsuario': nomeUsuario},
+            );
+          } else {
+            setState(() {
+              errorMessage = 'Usuário não encontrado.';
+            });
+          }
         } else {
           setState(() {
             errorMessage = 'Erro ao buscar informações do usuário.';

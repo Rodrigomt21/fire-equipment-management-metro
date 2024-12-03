@@ -195,6 +195,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:pi_metro/screens/Dashboard.dart';
+import 'package:pi_metro/screens/Telas_Usuarios/cadastro.dart';
 import 'package:pi_metro/screens/Telas_Usuarios/forgot_password_screen.dart';
 import 'package:pi_metro/screens/Telas_Usuarios/login.dart';
 import 'package:provider/provider.dart';
@@ -230,6 +231,7 @@ class MyApp extends StatelessWidget {
       initialRoute: isLoggedIn ? '/welcome-dashboard' : '/login',
       routes: {
         '/login': (_) => const LoginPage(),
+        '/cadastro': (_) => const CadastroPage(),
         '/welcome-dashboard': (_) => const Dashboard(),
         '/forgot-password': (context) => ForgotPasswordScreen(),
       },

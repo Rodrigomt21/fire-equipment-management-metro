@@ -13,14 +13,17 @@ dependencies:
   hive_flutter: ^1.1.0
   mysql_client: ^0.0.27
   http: ^1.2.0
-  webview_flutter: ^3.0.4
   google_fonts: ^6.2.1
   email_validator: ^2.0.1
   uni_links: ^0.5.1
   shared_preferences: ^2.0.17 
   provider: ^6.0.4
-  webview_windows: ^0.2.0
-
+  url_launcher: ^6.0.20  # Ou a versão mais recente
+  webview_flutter: ^4.10.0
+  intl: ^0.20.1
+  printing: ^5.13.4
+  pdf: ^3.11.1
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -29,9 +32,16 @@ dev_dependencies:
 
 flutter:
   assets:
-    - lib/imgs/fundoHub.png
-    - lib/imgs/telaCadastro.png
-    - lib/imgs/trilhos.png
-    - lib/imgs/logo.png
-    - lib/imgs/telaLogin.png
+  - lib/imgs/fundoHub.png
+  - lib/imgs/telaCadastro.png
+  - lib/imgs/trilhos.png
+  - lib/imgs/logo.png
+  - lib/imgs/telaLogin.png
+  - lib/imgs/logo.jpeg
+  - lib/imgs/Metro.jpeg
+  - lib/imgs/pilar_metro_1.jpeg
+  - lib/imgs/pilar_metro_2.jpeg
+  - lib/imgs/default_profile.png
+  - lib/imgs/logo_principal.jpeg
+
   uses-material-design: true

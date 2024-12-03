@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pi_metro/screens/Opcoes_Dashboard/Configuracao/Tela_Configuracao.dart';
+import 'package:pi_metro/screens/Opcoes_Dashboard/Tela_Alterar_EXT.dart';
+import 'package:pi_metro/screens/Opcoes_Dashboard/Tela_Consulta.dart';
 import 'package:pi_metro/screens/Opcoes_Dashboard/Tela_Notificacao.dart';
-import 'package:pi_metro/screens/Opcoes_Dashboard/Tela_Relatorio.dart';
+import 'package:pi_metro/screens/Opcoes_Dashboard/Tela_RegistrarExtintorManual.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -134,11 +138,7 @@ class _DashboardState extends State<Dashboard> {
                       title: 'Alterar\nExtintores',
                       icon: Icons.edit,
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const NotificacoesPage(userId: '',)),
-                        );
+                            Navigator.push( context, MaterialPageRoute( builder: (context) => const TelaEditarExtintor(patrimonio: '',)));                
                       },
                     ),
                     const SizedBox(width: 30),
@@ -149,7 +149,9 @@ class _DashboardState extends State<Dashboard> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const NotificacoesPage(userId: '',)),
+                              builder: (context) => const TelaConsultaExtintor(
+                              
+                                  )),
                         );
                       },
                     ),
@@ -161,7 +163,7 @@ class _DashboardState extends State<Dashboard> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const NotificacoesPage(userId: '',)),
+                              builder: (context) =>  TelaRegistrarExtintor()),
                         );
                       },
                     ),
@@ -173,15 +175,19 @@ class _DashboardState extends State<Dashboard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // Card de Relatórios
                     _buildLargerCard(
                       title: 'Relatórios',
                       icon: Icons.bar_chart,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>  RelatoriosScreen()),
-                        );
+                      onTap: () async {
+                        final String url =
+                            'https://app.powerbi.com/view?r=eyJrIjoiMTU2MmI3ZmQtODA1Mi00ODg5LWJiNWMtZTljMzRhZjRjZTgwIiwidCI6ImM0OWUxOTM5LTRiNTMtNDczOC1iYjY0LTQxZmIyOTkwZTQxYyJ9';
+                        final Uri uri = Uri.parse(url);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri);
+                        } else {
+                          throw 'Não foi possível abrir o link: $url';
+                        }
                       },
                     ),
                     const SizedBox(width: 30),
@@ -192,7 +198,9 @@ class _DashboardState extends State<Dashboard> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const NotificacoesPage(userId: '',)),
+                              builder: (context) => const NotificacoesPage(
+                                    userId: '',
+                                  )),
                         );
                       },
                     ),
@@ -204,7 +212,7 @@ class _DashboardState extends State<Dashboard> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const NotificacoesPage(userId: '',)),
+                              builder: (context) => const TelaConfiguracao()),
                         );
                       },
                     ),
