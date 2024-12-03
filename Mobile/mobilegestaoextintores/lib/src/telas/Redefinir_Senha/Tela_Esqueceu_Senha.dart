@@ -80,7 +80,14 @@ class _ForgotPasswordScreenState extends State<TelaEsqueceuSenha> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Esqueceu a Senha')),
+      appBar: AppBar(title: Text('Esqueceu a Senha',
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: Color(0xFFD9D9D9))),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF011689),
+        elevation: 4,
+        iconTheme: const IconThemeData(color: Color(0xFFD9D9D9)),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -89,16 +96,31 @@ class _ForgotPasswordScreenState extends State<TelaEsqueceuSenha> {
               controller: _emailController,
               decoration: InputDecoration(
                 labelText: 'Digite seu e-mail',
-                errorText: errorMessage,
+                labelStyle: TextStyle(color: Colors.black), // Cor do rótulo
+                errorText: errorMessage, // Mensagem de erro
+                border: OutlineInputBorder(), // Adiciona borda ao campo
+                filled: true, // Preenche o fundo do campo
+                fillColor: Colors.white, // Cor de fundo do campo
               ),
-              keyboardType: TextInputType.emailAddress,
+              keyboardType: TextInputType.emailAddress, // Tipo de teclado para email
             ),
+
             SizedBox(height: 20),
             isLoading
                 ? CircularProgressIndicator() // Mostra um carregamento enquanto a solicitação é processada
                 : ElevatedButton(
                     onPressed: _submitEmail,
-                    child: Text('Enviar Link de Redefinição'),
+                    child: Text('Enviar Link de Redefinição', 
+                    style:
+                      TextStyle(color: Color(0xFFD9D9D9), fontSize: 15)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF011689),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                   ),
           ],
         ),
