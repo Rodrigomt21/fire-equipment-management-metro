@@ -423,6 +423,7 @@ class _TelaAtualizarExtintorState extends State<TelaAtualizarExtintor> {
   }) {
     return Card(
       elevation: 4,
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),

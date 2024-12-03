@@ -283,14 +283,21 @@ class _RegistrarProblemaExtintorPageState
             problemas.isEmpty
                 ? const Text('Nenhum problema registrado.')
                 : Container(
-                    height: 300,
-                    child: ListView.builder(
-                      itemCount: problemas.length,
-                      itemBuilder: (context, index) {
-                        return _buildProblemCard(problemas[index]);
-                      },
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Fundo branco
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.15),
+                          spreadRadius: 3,
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
                     ),
-                  ),
+                  )
+
           ],
         ),
       ),
@@ -300,6 +307,7 @@ class _RegistrarProblemaExtintorPageState
   Widget _buildProblemCard(Map<String, dynamic> problema) {
     return Card(
       elevation: 2,
+      color: Colors.white,
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -339,6 +347,7 @@ class _RegistrarProblemaExtintorPageState
   Widget _buildCard({required Widget child}) {
     return Card(
       elevation: 4,
+      color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),

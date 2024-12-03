@@ -276,11 +276,20 @@ class _TelaRegistrarExtintorState extends State<TelaRegistrarExtintor> {
         fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: Colors.black, width: 1.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.black, width: 1.0),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.black, width: 1.0),
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
+
     );
   }
 
@@ -299,11 +308,20 @@ class _TelaRegistrarExtintorState extends State<TelaRegistrarExtintor> {
         fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: Colors.black, width: 1.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.black, width: 1.0),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.black, width: 1.0),
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
+
       onTap: isDate ? () => _selectDate(controller) : null,
     );
   }

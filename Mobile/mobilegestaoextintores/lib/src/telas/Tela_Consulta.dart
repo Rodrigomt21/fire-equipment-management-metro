@@ -181,6 +181,7 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Dropdown com borda preta
           DropdownButtonFormField<String>(
             decoration: InputDecoration(
               labelText: 'Selecione o Patrimônio',
@@ -189,7 +190,15 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
               fillColor: const Color(0xFFF7F9FC),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
+                borderSide: const BorderSide(color: Colors.black, width: 1),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.black, width: 1),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.black, width: 1),
               ),
             ),
             items: _patrimoniosDisponiveis.map((String patrimonio) {
@@ -208,6 +217,7 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
             },
           ),
           const SizedBox(height: 16),
+          // TextField com borda preta
           TextField(
             controller: _patrimonioController,
             decoration: InputDecoration(
@@ -217,7 +227,15 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
               fillColor: const Color(0xFFF7F9FC),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
+                borderSide: const BorderSide(color: Colors.black, width: 1),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.black, width: 1),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.black, width: 1),
               ),
               hintText: 'Digite ou selecione acima',
               hintStyle: const TextStyle(color: Colors.black),
@@ -244,13 +262,17 @@ class _TelaConsultaExtintorState extends State<TelaConsultaExtintor> {
                 ? const CircularProgressIndicator(color: Colors.white)
                 : const Text(
                     'Buscar Extintor',
-                    style: TextStyle(color: Color(0xFFD9D9D9),fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Color(0xFFD9D9D9),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold),
                   ),
           ),
         ],
       ),
     );
   }
+
 
   Widget _buildErrorMessage() {
     return Padding(
