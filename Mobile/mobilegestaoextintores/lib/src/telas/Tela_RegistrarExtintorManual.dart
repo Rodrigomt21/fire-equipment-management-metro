@@ -340,9 +340,13 @@ class _TelaRegistrarExtintorState extends State<TelaRegistrarExtintor> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Registrar Extintor',
+          style: TextStyle(
+            fontWeight: FontWeight.bold, color: Color(0xFFD9D9D9))),
         backgroundColor: const Color(0xFF011689),
-        title: const Text('Registrar Extintor'),
-        foregroundColor: Colors.white,
+        centerTitle: true,
+        elevation: 4,
+        foregroundColor: const Color(0xFFD9D9D9),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: Colors.white,

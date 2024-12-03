@@ -56,7 +56,8 @@ db.connect((err) => {
         return;
     }
     console.log('Conectado ao banco de dados MySQL');
-    inserirUsuario('Lucas Silva', 'lucasbarboza299@gmail.com', 'senha123', 'MT00077', 2); // Altere os parâmetros conforme necessário
+    inserirUsuario('Lucas Silva', 'lucasbarboza299@gmail.com', 'senha123', 'MT00077', 2);
+    inserirUsuario('Fernanda Beatriz', 'febiatx@gmail.com', 'senha123', 'MT00018', 2); // Altere os parâmetros conforme necessário
 
 });
 

@@ -141,8 +141,7 @@ class _ManutencaoExtintorPageState extends State<ManutencaoExtintorPage> {
       backgroundColor: const Color(0xFFD9D9D9),
       appBar: AppBar(
         title: const Text(
-          "Histórico de Manutenção",
-          style: TextStyle(color: Colors.white),
+          "Histórico de Manutenção", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD9D9D9)),
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFF011689),

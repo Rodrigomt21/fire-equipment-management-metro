@@ -83,9 +83,13 @@ class _TelaConsultaLocalizacaoExtintorState
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: const Text('Consulta de Localização do Extintor'),
+        title: const Text('Consulta de Localização do Extintor',
+        style: TextStyle(
+                fontWeight: FontWeight.bold, color: Color(0xFFD9D9D9))),
         backgroundColor: const Color(0xFF011689),
         centerTitle: true,
+        elevation: 4,
+        iconTheme: const IconThemeData(color: Color(0xFFD9D9D9)),
       ),
       body: SingleChildScrollView(
         child: Padding(
