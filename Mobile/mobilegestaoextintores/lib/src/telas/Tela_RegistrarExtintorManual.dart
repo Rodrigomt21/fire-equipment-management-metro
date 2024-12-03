@@ -360,7 +360,7 @@ class _TelaRegistrarExtintorState extends State<TelaRegistrarExtintor> {
           child: Center(
             child: Card(
               elevation: 5,
-              color: Color(0xFFD9D9D9),
+              color: Color.fromARGB(255, 255, 255, 255),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),

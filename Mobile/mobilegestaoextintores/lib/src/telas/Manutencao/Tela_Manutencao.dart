@@ -154,7 +154,7 @@ class _ManutencaoExtintorPageState extends State<ManutencaoExtintorPage> {
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          color: const Color(0xFFD9D9D9), // Cor do card
+          color: const Color.fromARGB(255, 254, 252, 252), // Cor do card
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: SingleChildScrollView(
@@ -171,7 +171,7 @@ class _ManutencaoExtintorPageState extends State<ManutencaoExtintorPage> {
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       filled: true,
-                      fillColor: const Color(0xFFD9D9D9), // Cor do campo
+                      fillColor: Colors.white, // Cor do campo
                     ),
                     hint: const Text("Selecione o extintor"),
                     items: extintores.map((extintor) {
@@ -236,7 +236,7 @@ class _ManutencaoExtintorPageState extends State<ManutencaoExtintorPage> {
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       filled: true,
-                      fillColor: const Color(0xFFD9D9D9), // Cor do campo
+                      fillColor: Colors.white, // Cor do campo
                     ),
                     hint: const Text("Selecione o Status"),
                     items: statusOptions.map((status) {
@@ -284,7 +284,7 @@ class _ManutencaoExtintorPageState extends State<ManutencaoExtintorPage> {
         labelText: labelText,
         border: OutlineInputBorder(),
         filled: true,
-        fillColor: const Color(0xFFD9D9D9), // Cor dos campos
+        fillColor: Colors.white, // Cor dos campos
       ),
     );
   }
