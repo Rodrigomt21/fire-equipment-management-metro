@@ -155,7 +155,7 @@ class _TelaConsultaLocalizacaoExtintorState
                 ? const CircularProgressIndicator(color: Colors.white)
                 : const Text(
                     'Buscar Localização',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFD9D9D9)),
                   ),
           ),
         ],
