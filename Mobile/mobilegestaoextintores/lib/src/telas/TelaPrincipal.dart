@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobilegestaoextintores/src/telas/Configuracao/Tela_Configuracao.dart';
+import 'package:mobilegestaoextintores/src/telas/TelaScanQR.dart';
 import 'package:mobilegestaoextintores/src/telas/Tela_Consulta.dart';
 import 'package:mobilegestaoextintores/src/telas/Tela_Localizacao.dart';
 import 'package:mobilegestaoextintores/src/telas/Tela_RegistrarExtintorManual.dart';
@@ -155,7 +156,11 @@ class TelaPrincipal extends StatelessWidget {
                       icon: Icons.qr_code_scanner,
                       label: 'Scanner QR',
                       onTap: () {
-                        Navigator.pushNamed(context, '/scan-qr');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => QRViewExample()),
+                        );
                       },
                     ),
                     _buildIconButton(

@@ -1,6 +1,6 @@
-require('dotenv').config(); 
+require('dotenv').config();
 const fs = require('fs');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise'); // Alterado para usar a versão de promessas
 const cors = require('cors');
 const PDFDocument = require('pdfkit');
 const express = require('express');
@@ -11,37 +11,55 @@ const moment = require('moment');
 const { check, validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer'); 
+const nodemailer = require('nodemailer');
 const fileUpload = require('express-fileupload');
 const app = express();
-const cron = require('node-cron');
 const PORT = 3001;
+const profileImagesDir = path.join(__dirname, 'image_perfil');
+const uploadsDir = path.join(__dirname, 'uploads');
+const cron = require('node-cron');
 
-// ========================= Conexão com o Banco de Dados: ========================= //
-
-
-const db = mysql.createConnection({
+// Criando a conexão com o banco de dados usando promessas
+const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
 });
 
-db.connect((err) => {
-    if (err) {
-        console.error('Erro ao conectar ao banco de dados:', err);
-        return;
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'suporte.redefinir.senha.imt.pi@gmail.com',
+        pass: 'eioj nzcm dcpp xjgd'
     }
-    console.log('Conectado ao banco de dados MySQL');
-    // inserirUsuario('Lucas Silva', 'lucasbarboza299@gmail.com', 'senha123', 'MT00077', 2);
-    // inserirUsuario('Fernanda Beatriz', 'febiatx@gmail.com', 'senha123', 'MT00018', 2); // Altere os parâmetros conforme necessário
+});
 
+app.use(cors({
+    origin: '*',
+    methods: 'GET, POST, PUT, DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
+}));
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(fileUpload());
+app.use('/image_perfil', express.static(profileImagesDir));
+app.use('/uploads', express.static(uploadsDir));
+
+// Garantindo que as Pastas Existam
+const dirsToCheck = [profileImagesDir, uploadsDir];
+dirsToCheck.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+    }
 });
 
 
 async function inserirUsuario(nome, email, senha, matricula, cargo_id) {
     try {
         const hashedPassword = await bcrypt.hash(senha, 10);
+
         const query = `
             INSERT INTO usuarios (nome, email, senha, matricula, cargo_id) 
             VALUES (?, ?, ?, ?, ?)
@@ -60,113 +78,14 @@ async function inserirUsuario(nome, email, senha, matricula, cargo_id) {
     }
 }
 
-//  ========================= Verifica se a pasta "uploads" e "image_perfil" existem ========================= //
-
-
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir);
-}
-
-
-const profileImagesDir = path.join(__dirname, 'image_perfil');
-if (!fs.existsSync(profileImagesDir)) {
-    fs.mkdirSync(profileImagesDir);
-}
-
-
-// ========================= Função ========================= //
-
-
 const gerarSalvarQRCode = async (patrimonio) => {
-    const qrCodeData = `http://localhost:3001/pdf/${patrimonio}`; 
+    const qrCodeData = `http://localhost:3001/pdf/${patrimonio}`;
     const qrCodePath = path.join(uploadsDir, `${patrimonio}-qrcode.png`);
 
     await QRCode.toFile(qrCodePath, qrCodeData);
     console.log(`QR Code gerado e salvo em: ${qrCodePath}`);
     return qrCodePath;
 };
-
-
-// Middleware
-app.use(cors({ origin: '*', methods: 'GET, POST, PUT, DELETE', allowedHeaders: 'Content-Type, Authorization', }));
-app.use('/uploads', express.static(uploadsDir));
-app.use('/image_perfil', express.static(profileImagesDir));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(fileUpload());
-
-
-// ========================= ENDPOINT PARA DADOS DO USUARIO ========================= //
-
-
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).json({ success: false, message: 'Campos obrigatórios faltando' });
-    }
-
-    const query = `
-        SELECT usuarios.id, usuarios.nome, usuarios.senha, cargos.nome AS cargo
-        FROM usuarios
-        JOIN cargos ON usuarios.cargo_id = cargos.id
-        WHERE usuarios.email = ?`;
-
-    db.query(query, [email], async (err, results) => {
-        if (err) {
-            console.error('Erro ao consultar o banco de dados:', err);
-            return res.status(500).json({ success: false, message: 'Erro no servidor' });
-        }
-
-        if (results.length === 0) {
-            return res.status(401).json({ success: false, message: 'Email ou senha incorretos' });
-        }
-
-        const usuario = results[0];
-        const match = await bcrypt.compare(password, usuario.senha);
-        if (!match) {
-            return res.status(401).json({ success: false, message: 'Email ou senha incorretos' });
-        }
-
-        return res.json({ success: true, nome: usuario.nome, cargo: usuario.cargo });
-    });
-});
-
-
-app.get('/usuario', (req, res) => {
-    const email = req.query.email;
-    if (!email) {
-        return res.status(400).json({ success: false, message: 'Email é obrigatório' });
-    }
-
-    const query = `
-    SELECT usuarios.*, cargos.nome AS cargo
-    FROM usuarios
-    LEFT JOIN cargos ON usuarios.cargo_id = cargos.id
-    WHERE usuarios.email = ?`;
-    db.query(query, [email], (err, results) => {
-        if (err) {
-            console.error('Erro ao buscar usuário:', err);
-            return res.status(500).json({ success: false, message: 'Erro ao buscar usuário' });
-        }
-
-        if (results.length === 0) {
-            return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
-        }
-
-        const usuario = results[0];
-        const urlImagem = usuario.foto_perfil
-            ? `${req.protocol}://${req.get('host')}/${usuario.foto_perfil.replace(/\\/g, '/')}`
-            : null; 
-
-        res.json({ success: true, ...usuario, foto_perfil: urlImagem });
-    });
-});
-
-
-// ========================= ENDPOINT PARA CRIAR, ATUALIZAR E DELETAR ALGO RELACIONADO AO EXTINTOR ========================= //
-
 
 app.post('/registrar_extintor', async (req, res) => {
     const {
@@ -182,40 +101,28 @@ app.post('/registrar_extintor', async (req, res) => {
         estacao,
         descricao_local,
         observacoes_local,
-        observacoes, // Observação do extintor
+        observacoes, 
         status,
     } = req.body;
 
     try {
-        // Primeiro, insira a localização na tabela localizacoes
-        const localizacaoQuery = `
-    INSERT INTO localizacoes (Linha_ID, Estacao, Descricao_Local, Observacoes)
-    VALUES (?, ?, ?, ?)
-`;
+        const localizacaoQuery = ` INSERT INTO localizacoes (Linha_ID, Estacao, Descricao_Local, Observacoes) VALUES (?, ?, ?, ?)`;
         const localizacaoParams = [linha_id, estacao, descricao_local, observacoes_local];
         const [localizacaoResult] = await db.promise().query(localizacaoQuery, localizacaoParams);
 
         const id_localizacao = localizacaoResult.insertId; // Obter o ID da nova localização
 
-        // Agora, insira o extintor na tabela extintores
-        const query = `
-            INSERT INTO Extintores 
-            (Patrimonio, Tipo_ID, Capacidade_ID, Codigo_Fabricante, Data_Fabricacao, Data_Validade, Ultima_Recarga, Proxima_Inspecao, ID_Localizacao, Linha_ID, Status_ID, Observacoes) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
+        const query = `INSERT INTO Extintores (Patrimonio, Tipo_ID, Capacidade_ID, Codigo_Fabricante, Data_Fabricacao, Data_Validade, Ultima_Recarga, Proxima_Inspecao, ID_Localizacao, Linha_ID, Status_ID, Observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
         await db.promise().query(query, [
             patrimonio, tipo_id, capacidade_id, codigo_fabricante,
             moment(data_fabricacao, 'DD/MM/YYYY').format('YYYY-MM-DD'),
             moment(data_validade, 'DD/MM/YYYY').format('YYYY-MM-DD'),
             moment(ultima_recarga, 'DD/MM/YYYY').format('YYYY-MM-DD'),
             moment(proxima_inspecao, 'DD/MM/YYYY').format('YYYY-MM-DD'),
-            id_localizacao, linha_id, status, observacoes // Observação do extintor
+            id_localizacao, linha_id, status, observacoes 
         ]);
 
-        // Gerar e salvar o QR Code
         const qrCodePath = await gerarSalvarQRCode(patrimonio);
-
-        // Atualizar o caminho do QR Code no extintor
         const qrCodeUrl = `${req.protocol}://${req.get('host')}/uploads/${patrimonio}-qrcode.png`;
         await db.promise().query('UPDATE Extintores SET QR_Code = ? WHERE Patrimonio = ?', [qrCodeUrl, patrimonio]);
 
@@ -226,80 +133,16 @@ app.post('/registrar_extintor', async (req, res) => {
     }
 });
 
-
-app.post('/registrar_problema', (req, res) => {
-    const { patrimonio, Problema, local, observacoes } = req.body;
-
-    if (!patrimonio || !Problema || !local) {
-        return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios' });
-    }
-
-    const checkQuery = `
-        SELECT COUNT(*) AS count FROM Problemas_Extintores WHERE ID_Extintor = ?
-    `;
-
-    db.query(checkQuery, [patrimonio], (err, results) => {
-        if (err) {
-            console.error('Erro ao verificar problemas registrados:', err);
-            return res.status(500).json({ success: false, message: 'Erro ao verificar problemas registrados' });
-        }
-
-        if (results[0].count > 0) {
-            return res.status(400).json({ success: false, message: 'Já existe um problema registrado para este patrimônio.' });
-        }
-
-        const query = `
-            INSERT INTO Problemas_Extintores (ID_Extintor, Problema, Local, Observacoes)
-            VALUES (?, ?, ?, ?)
-        `;
-
-        db.query(query, [patrimonio, Problema, local, observacoes], (err) => {
-            if (err) {
-                console.error('Erro ao registrar problema:', err);
-                return res.status(500).json({ success: false, message: 'Erro ao registrar problema' });
-            }
-
-            res.status(200).json({ success: true, message: 'Problema registrado com sucesso!' });
-        });
-    });
-});
-
-
-app.post('/excluir_problema', (req, res) => {
-    const { patrimonio } = req.body;
-
-    if (!patrimonio) {
-        return res.status(400).json({ success: false, message: 'Patrimônio é obrigatório' });
-    }
-
-    const query = `
-        DELETE FROM Problemas_Extintores 
-        WHERE ID_Extintor = ?
-    `;
-
-    db.query(query, [patrimonio], (err) => {
-        if (err) {
-            console.error('Erro ao excluir problema:', err);
-            return res.status(500).json({ success: false, message: 'Erro ao excluir problema' });
-        }
-
-        res.status(200).json({ success: true, message: 'Problema excluído com sucesso!' });
-    });
-});
-
-
 app.get('/pdf/:patrimonio', async (req, res) => {
     const patrimonio = req.params.patrimonio;
 
     try {
-        // Recuperar os dados do extintor
         const [extintorResult] = await db.promise().query('SELECT * FROM Extintores WHERE Patrimonio = ?', [patrimonio]);
         if (extintorResult.length === 0) {
             return res.status(404).send('Extintor não encontrado.');
         }
         const data = extintorResult[0];
 
-        // Recuperar informações adicionais
         const [tipoResult] = await db.promise().query('SELECT tipo FROM tipos_extintores WHERE id = ?', [data.Tipo_ID]);
         const tipoNome = tipoResult.length > 0 ? tipoResult[0].tipo : 'Tipo não encontrado';
 
@@ -322,16 +165,13 @@ app.get('/pdf/:patrimonio', async (req, res) => {
         const ultimaRecargaFormatada = moment(data.Ultima_Recarga).format('DD/MM/YYYY');
         const proximaInspecaoFormatada = moment(data.Proxima_Inspecao).format('DD/MM/YYYY');
 
-        // Criar o PDF
         const doc = new PDFDocument();
         res.setHeader('Content-Type', 'application/pdf');
         doc.pipe(res);
 
-        // Adicionando um título
         doc.fontSize(20).text('Relatório do Extintor', { align: 'center' }).moveDown();
-        doc.moveTo(50, 50).lineTo(550, 50).stroke(); // Linha horizontal
+        doc.moveTo(50, 50).lineTo(550, 50).stroke(); 
 
-        // Adicionando as informações do extintor
         doc.fontSize(12)
             .text(`Patrimônio: ${data.Patrimonio}`)
             .text(`Tipo: ${tipoNome}`)
@@ -347,7 +187,6 @@ app.get('/pdf/:patrimonio', async (req, res) => {
             .text(`Observações: ${data.Observacoes}`)
             .moveDown();
 
-        // Adicionando o histórico de manutenção
         doc.fontSize(14).text('Histórico de Manutenção:', { underline: true }).moveDown();
         const [historicoResult] = await db.promise().query('SELECT * FROM historico_manutencao WHERE ID_Extintor = ?', [data.Patrimonio]);
         if (historicoResult.length > 0) {
@@ -364,7 +203,6 @@ app.get('/pdf/:patrimonio', async (req, res) => {
         res.status(500).send('Erro ao gerar o PDF.');
     }
 });
-
 
 app.post('/salvar_manutencao', (req, res) => {
     const {
@@ -457,7 +295,6 @@ app.post('/salvar_manutencao', (req, res) => {
     });
 });
 
-
 app.put('/extintor/:patrimonio', async (req, res) => {
     const patrimonio = req.params.patrimonio;
     const {
@@ -514,6 +351,42 @@ app.put('/extintor/:patrimonio', async (req, res) => {
     }
 });
 
+app.post('/registrar_problema', (req, res) => {
+    const { patrimonio, Problema, local, observacoes } = req.body;
+
+    if (!patrimonio || !Problema || !local) {
+        return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios' });
+    }
+
+    const checkQuery = `
+        SELECT COUNT(*) AS count FROM Problemas_Extintores WHERE ID_Extintor = ?
+    `;
+
+    db.query(checkQuery, [patrimonio], (err, results) => {
+        if (err) {
+            console.error('Erro ao verificar problemas registrados:', err);
+            return res.status(500).json({ success: false, message: 'Erro ao verificar problemas registrados' });
+        }
+
+        if (results[0].count > 0) {
+            return res.status(400).json({ success: false, message: 'Já existe um problema registrado para este patrimônio.' });
+        }
+
+        const query = `
+            INSERT INTO Problemas_Extintores (ID_Extintor, Problema, Local, Observacoes)
+            VALUES (?, ?, ?, ?)
+        `;
+
+        db.query(query, [patrimonio, Problema, local, observacoes], (err) => {
+            if (err) {
+                console.error('Erro ao registrar problema:', err);
+                return res.status(500).json({ success: false, message: 'Erro ao registrar problema' });
+            }
+
+            res.status(200).json({ success: true, message: 'Problema registrado com sucesso!' });
+        });
+    });
+});
 
 app.post('/upload', async (req, res) => {
     const { usuario_id } = req.body;
@@ -535,7 +408,7 @@ app.post('/upload', async (req, res) => {
             if (fotoPerfilAnterior) {
                 const caminhoAnterior = path.join(__dirname, fotoPerfilAnterior);
                 if (fs.existsSync(caminhoAnterior)) {
-                    fs.unlinkSync(caminhoAnterior);
+                    fs.unlinkSync(caminhoAnterior); 
                 }
             }
         }
@@ -555,51 +428,71 @@ app.post('/upload', async (req, res) => {
     }
 });
 
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
 
-async function atualizarStatusExtintores() {
-    const hoje = moment().format('YYYY-MM-DD'); // Data atual formatada
-
-    const query = `
-        UPDATE Extintores
-        SET status_id = (SELECT id FROM Status_Extintor WHERE nome = 'Vencido')
-        WHERE Data_Validade <= ?
-    `;
-
-    try {
-        await db.promise().query(query, [hoje]);
-        console.log('Status dos extintores atualizados para vencido, se aplicável.');
-    } catch (error) {
-        console.error('Erro ao atualizar status dos extintores:', error);
-    }
-}
-
-
-app.put('/atualizar_status_extintor', (req, res) => {
-    const { patrimonio, status } = req.body;
-
-    if (!patrimonio || !status) {
-        return res.status(400).json({ success: false, message: 'Patrimônio e status são obrigatórios' });
+    if (!email || !password) {
+        return res.status(400).json({ success: false, message: 'Campos obrigatórios faltando' });
     }
 
     const query = `
-        UPDATE extintores 
-        SET status_id = (SELECT id FROM status_extintor WHERE nome = ?) 
-        WHERE patrimonio = ?
-    `;
+        SELECT usuarios.id, usuarios.nome, usuarios.senha, cargos.nome AS cargo
+        FROM usuarios
+        JOIN cargos ON usuarios.cargo_id = cargos.id
+        WHERE usuarios.email = ?`;
 
-    db.query(query, [status, patrimonio], (err) => {
+    db.query(query, [email], async (err, results) => {
         if (err) {
-            console.error('Erro ao atualizar status do extintor:', err);
-            return res.status(500).json({ success: false, message: 'Erro ao atualizar status do extintor' });
+            console.error('Erro ao consultar o banco de dados:', err);
+            return res.status(500).json({ success: false, message: 'Erro no servidor' });
         }
 
-        res.status(200).json({ success: true, message: 'Status do extintor atualizado com sucesso!' });
+        if (results.length === 0) {
+            return res.status(401).json({ success: false, message: 'Email ou senha incorretos' });
+        }
+
+        const usuario = results[0];
+
+        // Verifica a senha usando bcrypt
+        const match = await bcrypt.compare(password, usuario.senha);
+        if (!match) {
+            return res.status(401).json({ success: false, message: 'Email ou senha incorretos' });
+        }
+
+        return res.json({ success: true, nome: usuario.nome, cargo: usuario.cargo });
     });
 });
 
+app.get('/usuario', (req, res) => {
+    const email = req.query.email;
+    if (!email) {
+        return res.status(400).json({ success: false, message: 'Email é obrigatório' });
+    }
 
-// ========================= CONSULTAS ========================= //
+    const query = `
+    SELECT usuarios.*, cargos.nome AS cargo
+    FROM usuarios
+    LEFT JOIN cargos ON usuarios.cargo_id = cargos.id
+    WHERE usuarios.email = ?`;
+    db.query(query, [email], (err, results) => {
+        if (err) {
+            console.error('Erro ao buscar usuário:', err);
+            return res.status(500).json({ success: false, message: 'Erro ao buscar usuário' });
+        }
 
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
+        }
+
+        const usuario = results[0];
+        // Corrigir a construção da URL da imagem
+        const urlImagem = usuario.foto_perfil
+            ? `${req.protocol}://${req.get('host')}/${usuario.foto_perfil.replace(/\\/g, '/')}`
+            : null; 
+
+        res.json({ success: true, ...usuario, foto_perfil: urlImagem }); // Retorna a URL da imagem
+    });
+});
 
 app.get('/patrimonio', (req, res) => {
     const query = 'SELECT patrimonio FROM extintores';
@@ -617,7 +510,6 @@ app.get('/patrimonio', (req, res) => {
         });
     });
 });
-
 
 app.get('/extintor/:patrimonio', (req, res) => {
     const patrimonio = req.params.patrimonio;
@@ -673,7 +565,6 @@ app.get('/extintor/:patrimonio', (req, res) => {
     });
 });
 
-
 app.get('/extintores', (req, res) => {
     const query = 'SELECT Patrimonio, Tipo_ID FROM Extintores';
     db.query(query, (err, results) => {
@@ -685,7 +576,6 @@ app.get('/extintores', (req, res) => {
         res.status(200).json({ success: true, extintores: results });
     });
 });
-
 
 app.get('/status', (req, res) => {
     const query = 'SELECT id, nome FROM Status_Extintor';
@@ -699,7 +589,6 @@ app.get('/status', (req, res) => {
         res.json({ success: true, data: results });
     });
 });
-
 
 app.get('/problemas', (req, res) => {
     const query = `
@@ -724,7 +613,6 @@ app.get('/problemas', (req, res) => {
     });
 });
 
-
 app.get('/extintores-com-problemas', (req, res) => {
     const query = `
         SELECT DISTINCT e.Patrimonio, e.Tipo_ID 
@@ -742,6 +630,27 @@ app.get('/extintores-com-problemas', (req, res) => {
     });
 });
 
+app.post('/excluir_problema', (req, res) => {
+    const { patrimonio } = req.body;
+
+    if (!patrimonio) {
+        return res.status(400).json({ success: false, message: 'Patrimônio é obrigatório' });
+    }
+
+    const query = `
+        DELETE FROM Problemas_Extintores 
+        WHERE ID_Extintor = ?
+    `;
+
+    db.query(query, [patrimonio], (err) => {
+        if (err) {
+            console.error('Erro ao excluir problema:', err);
+            return res.status(500).json({ success: false, message: 'Erro ao excluir problema' });
+        }
+
+        res.status(200).json({ success: true, message: 'Problema excluído com sucesso!' });
+    });
+});
 
 app.get('/tipos-extintores', (req, res) => {
     const query = 'SELECT id, tipo AS nome FROM Tipos_Extintores';
@@ -755,7 +664,6 @@ app.get('/tipos-extintores', (req, res) => {
         res.json({ success: true, data: results });
     });
 });
-
 
 app.get('/localizacoes', (req, res) => {
     const linhaId = req.query.linhaId;
@@ -782,7 +690,6 @@ app.get('/localizacoes', (req, res) => {
     });
 });
 
-
 app.get('/linhas', (req, res) => {
     const query = 'SELECT * FROM Linhas';
 
@@ -795,7 +702,6 @@ app.get('/linhas', (req, res) => {
     });
 });
 
-
 app.get('/capacidades', (req, res) => {
     const query = 'SELECT id, descricao FROM capacidades';
     db.query(query, (err, results) => {
@@ -807,7 +713,6 @@ app.get('/capacidades', (req, res) => {
         res.json({ success: true, data: results });
     });
 });
-
 
 app.get('/extintor/localizacao/:patrimonio', (req, res) => {
     const patrimonio = req.params.patrimonio;
@@ -838,19 +743,6 @@ app.get('/extintor/localizacao/:patrimonio', (req, res) => {
         res.status(200).json({ success: true, localizacao });
     });
 });
-
-
-// ========================= ENDPOINT PARA REDEFINIR SENHA ========================= //
-
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail', 
-    auth: {
-        user: 'suporte.redefinir.senha.imt.pi@gmail.com', 
-        pass: 'eioj nzcm dcpp xjgd' 
-    }
-});
-
 
 app.post('/forgot-password', (req, res) => {
     const { email } = req.body;
@@ -896,12 +788,11 @@ app.post('/forgot-password', (req, res) => {
     });
 });
 
-
 app.post('/reset-password', [
     check('token').not().isEmpty().withMessage('Token é obrigatório'),
     check('newPassword').isLength({ min: 6 }).withMessage('A nova senha deve ter pelo menos 6 caracteres')
 ], async (req, res) => {
-    console.log('Dados recebidos:', req.body); 
+    console.log('Dados recebidos:', req.body); // Adicione este log
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -910,7 +801,7 @@ app.post('/reset-password', [
     }
 
     const { token, newPassword } = req.body;
-    console.log('Token recebido:', token); 
+    console.log('Token recebido:', token); // Log para verificar o token
 
     const sql = 'SELECT * FROM usuarios WHERE reset_password_token = ? AND reset_password_expires > NOW()';
     db.query(sql, [token], async (err, results) => {
@@ -936,7 +827,6 @@ app.post('/reset-password', [
         });
     });
 });
-
 
 app.get('/reset-password', (req, res) => {
     const { token } = req.query;
@@ -976,10 +866,6 @@ app.get('/reset-password', (req, res) => {
     `);
 });
 
-
-// ========================= ENDPOINT PARA REPORTAR ERRO ========================= //
-
-
 app.post('/reportar-erro', async (req, res) => {
     const { usuarioEmail, erroDescricao } = req.body;
 
@@ -1005,15 +891,60 @@ app.post('/reportar-erro', async (req, res) => {
     }
 });
 
+async function atualizarStatusExtintores() {
+    const hoje = moment().format('YYYY-MM-DD');
+
+    const query = `
+        UPDATE Extintores
+        SET status_id = (SELECT id FROM Status_Extintor WHERE nome = 'Vencido')
+        WHERE Data_Validade <= ?
+    `;
+
+    try {
+        const [result] = await db.query(query, [hoje]);
+        console.log(`Status dos extintores atualizados para vencido, se aplicável. Registros afetados: ${result.affectedRows}`);
+        return result.affectedRows;
+    } catch (error) {
+        console.error('Erro ao atualizar status dos extintores:', error);
+        throw error;
+    }
+}
+
+app.put('/atualizar_status_extintor', async (req, res) => {
+    const { patrimonio, status } = req.body;
+
+    if (!patrimonio || !status) {
+        return res.status(400).json({ success: false, message: 'Patrimônio e status são obrigatórios' });
+    }
+
+    const query = `
+        UPDATE extintores 
+        SET status_id = (SELECT id FROM status_extintor WHERE nome = ?) 
+        WHERE patrimonio = ?
+    `;
+
+    try {
+        const [result] = await db.query(query, [status, patrimonio]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Extintor não encontrado' });
+        }
+        res.status(200).json({ success: true, message: 'Status do extintor atualizado com sucesso!' });
+    } catch (err) {
+        console.error('Erro ao atualizar status do extintor:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao atualizar status do extintor' });
+    }
+});
 
 app.listen(PORT, '0.0.0.0', async () => {
     console.log(`Servidor rodando na porta ${PORT}`);
-    await atualizarStatusExtintores(); 
+    await atualizarStatusExtintores();
 });
-
 
 cron.schedule('0 0 * * *', async () => {
-    await atualizarStatusExtintores();
-    console.log('Verificação diária de status de extintores realizada.');
+    try {
+        await atualizarStatusExtintores();
+        console.log('Verificação diária de status de extintores realizada.');
+    } catch (error) {
+        console.error('Erro na verificação diária de status de extintores:', error);
+    }
 });
-

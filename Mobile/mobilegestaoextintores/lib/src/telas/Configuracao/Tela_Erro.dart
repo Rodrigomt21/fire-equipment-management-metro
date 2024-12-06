@@ -31,7 +31,7 @@ class _TelaReportarErroState extends State<TelaReportarErro> {
     final erro = _controller.text.trim();
     if (erro.isNotEmpty && _usuarioEmail != null) {
       final response = await http.post(
-        Uri.parse('http://10.2.0.32:3001/reportar-erro'),
+        Uri.parse('http://localhost:3001/reportar-erro'),
         headers: {
           'Content-Type': 'application/json',
         },

@@ -32,7 +32,7 @@ class _TelaConsultaLocalizacaoExtintorState
     });
 
     final url = Uri.parse(
-        'http://10.2.0.32:3001/extintor/localizacao/$_patrimonio'); // Substitua 10.2.0.32 pelo IP da sua máquina
+        'http://localhost:3001/extintor/localizacao/$_patrimonio'); // Substitua localhost pelo IP da sua máquina
 
     try {
       final response = await http.get(url);

@@ -40,7 +40,7 @@ class _TelaContaState extends State<TelaConta> {
 
     try {
       final response = await http
-          .get(Uri.parse('http://10.2.0.32:3001/usuario?email=$email'));
+          .get(Uri.parse('http://localhost:3001/usuario?email=$email'));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -88,7 +88,7 @@ class _TelaContaState extends State<TelaConta> {
     if (imagem != null) {
       final bytes = await imagem.readAsBytes();
 
-      var uri = Uri.parse('http://10.2.0.32:3001/upload');
+      var uri = Uri.parse('http://localhost:3001/upload');
       var request = http.MultipartRequest('POST', uri);
 
       

@@ -13,10 +13,12 @@ class TelaLogin extends StatefulWidget {
 }
 
 class _TelaLoginState extends State<TelaLogin> {
+  final _formKey = GlobalKey<FormState>();
   bool _obscureText = true;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String _errorMessage = '';
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -38,6 +40,63 @@ class _TelaLoginState extends State<TelaLogin> {
     }
   }
 
+  Future<void> _login(BuildContext context) async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse(
+            'http://localhost:3001/login'), // Altere para o IP correto se necessário
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': _emailController.text,
+          'password': _passwordController.text,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data['success'] == true) {
+          final prefs = await SharedPreferences.getInstance();
+          prefs.setString('usuario_email', _emailController.text);
+          prefs.setBool('usuario_logado', true);
+          prefs.setString('usuario_nome', data['nome']);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const TelaPrincipal(),
+            ),
+          );
+        } else {
+          // Exibe a mensagem de erro retornada pelo servidor
+          _showError(data['message']);
+        }
+      } else {
+        // Se a resposta não for 200, exiba a mensagem de erro do servidor
+        final data = jsonDecode(response.body);
+        _showError(data['message'] ?? 'Erro desconhecido');
+      }
+    } catch (e) {
+      _showError('Erro inesperado ao fazer login');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -47,88 +106,91 @@ class _TelaLoginState extends State<TelaLogin> {
       backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              IntrinsicHeight(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Flexible(
-                      flex: 1,
-                      child: Image.asset(
-                        'assets/images/logo.jpeg',
-                        height: imageHeight,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    Flexible(
-                      flex: 2,
-                      child: Image.asset(
-                        'assets/images/Metro.jpeg',
-                        height: imageHeight,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                width: 380,
-                child: const Divider(
-                  thickness: 1,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Card(
-                elevation: 8,
-                color: Colors.grey[50],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                IntrinsicHeight(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      _buildEmailField(),
-                      const SizedBox(height: 20),
-                      _buildPasswordField(),
-                      const SizedBox(height: 20),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => TelaEsqueceuSenha()),
-                          );
-                        },
-                        child: const Text(
-                          'Esqueceu a senha?',
-                          style:
-                              TextStyle(color: Colors.blueAccent, fontSize: 14),
+                      Flexible(
+                        flex: 1,
+                        child: Image.asset(
+                          'assets/images/logo.jpeg',
+                          height: imageHeight,
+                          fit: BoxFit.contain,
                         ),
                       ),
-                      if (_errorMessage.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: Text(
-                            _errorMessage,
-                            style: const TextStyle(color: Colors.red),
-                          ),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        flex: 2,
+                        child: Image.asset(
+                          'assets/images/Metro.jpeg',
+                          height: imageHeight,
+                          fit: BoxFit.contain,
                         ),
+                      ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 30),
-              _buildLoginButton(context),
-              const SizedBox(height: 50),
-            ],
+                const SizedBox(height: 20),
+                Container(
+                  width: 380,
+                  child: const Divider(
+                    thickness: 1,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Card(
+                  elevation: 8,
+                  color: Colors.grey[50],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        _buildEmailField(),
+                        const SizedBox(height: 20),
+                        _buildPasswordField(),
+                        const SizedBox(height: 20),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TelaEsqueceuSenha()),
+                            );
+                          },
+                          child: const Text(
+                            'Esqueceu a senha?',
+                            style: TextStyle(
+                                color: Colors.blueAccent, fontSize: 14),
+                          ),
+                        ),
+                        if (_errorMessage.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Text(
+                              _errorMessage,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                _buildLoginButton(context),
+                const SizedBox(height: 50),
+              ],
+            ),
           ),
         ),
       ),
@@ -172,13 +234,22 @@ class _TelaLoginState extends State<TelaLogin> {
           ),
         ],
       ),
-      child: TextField(
+      child: TextFormField(
         controller: _emailController,
         decoration: const InputDecoration(
           icon: Icon(Icons.email, color: Colors.blueAccent),
           border: InputBorder.none,
           hintText: 'Email',
         ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor, insira um e-mail';
+          }
+          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+            return 'Por favor, insira um e-mail válido';
+          }
+          return null;
+        },
       ),
     );
   }
@@ -197,7 +268,7 @@ class _TelaLoginState extends State<TelaLogin> {
           ),
         ],
       ),
-      child: TextField(
+      child: TextFormField(
         controller: _passwordController,
         obscureText: _obscureText,
         decoration: InputDecoration(
@@ -216,13 +287,19 @@ class _TelaLoginState extends State<TelaLogin> {
             },
           ),
         ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor, insira uma senha';
+          }
+          return null;
+        },
       ),
     );
   }
 
   Widget _buildLoginButton(BuildContext context) {
     return ElevatedButton(
-      onPressed: () => _login(context),
+      onPressed: _isLoading ? null : () => _login(context),
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF004AAD),
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 50),
@@ -230,108 +307,17 @@ class _TelaLoginState extends State<TelaLogin> {
           borderRadius: BorderRadius.circular(10),
         ),
       ),
-      child: const Text(
-        'ENTRAR',
-        style: TextStyle(
-          fontSize: 16,
-          color: Colors.white,
-        ),
-      ),
+      child: _isLoading
+          ? const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            )
+          : const Text(
+              'ENTRAR',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
     );
   }
-
-  Future<void> _login(BuildContext context) async {
-    try {
-      final response = await http.post(
-        Uri.parse('http://10.2.0.32:3001/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': _emailController.text,
-          'password': _passwordController.text,
-        }),
-      );
-
-      print('Resposta da API: ${response.body}');
-      print('Código de status: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        if (data['success'] == true) {
-          final prefs = await SharedPreferences.getInstance();
-          prefs.setString('usuario_email', _emailController.text);
-          prefs.setBool('usuario_logado', true);
-
-          // Salva o nome do usuário
-          prefs.setString('usuario_nome', data['nome']);
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const TelaPrincipal(),
-            ),
-          );
-        } else {
-          print('Erro no servidor: ${data['message']}');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erro no login: ${data['message']}')),
-          );
-        }
-      } else {
-        print('Erro de conexão: ${response.statusCode}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro de conexão com o servidor')),
-        );
-      }
-    } catch (e) {
-      print('Erro ao tentar realizar login: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro inesperado ao fazer login')),
-      );
-    }
-  }
-
-  // Future<void> _login(BuildContext context) async {
-  //   final response = await http.post(
-  //     Uri.parse('http://10.2.0.32:3001/login'),
-  //     headers: {'Content-Type': 'application/json'},
-  //     body: jsonEncode({
-  //       'email': _emailController.text,
-  //       'password': _passwordController.text,
-  //     }),
-  //   );
-
-  //   print('Resposta da API: ${response.body}');
-  //   print('Código de status: ${response.statusCode}');
-
-  //   if (response.statusCode == 200) {
-  //     final data = jsonDecode(response.body);
-
-  //     if (data['success'] == true) {
-  //       final prefs = await SharedPreferences.getInstance();
-  //       prefs.setString('usuario_email', _emailController.text);
-  //       prefs.setBool('usuario_logado', true);
-
-  //       // Salva o nome do usuário
-  //       prefs.setString('usuario_nome', data['nome']);
-
-  //       Navigator.pushReplacement(
-  //         context,
-  //         MaterialPageRoute(
-  //           builder: (context) => const TelaPrincipal(),
-  //         ),
-  //       );
-  //     } else {
-  //       print('Erro no servidor: ${data['message']}');
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Erro no login: ${data['message']}')),
-  //       );
-  //     }
-  //   } else {
-  //     print('Erro de conexão: ${response.statusCode}');
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Erro de conexão com o servidor')),
-  //     );
-  //   }
-  // }
 }

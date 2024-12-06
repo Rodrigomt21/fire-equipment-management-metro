@@ -43,7 +43,7 @@ class _RegistrarProblemaExtintorPageState
   Future<void> _fetchProblemas() async {
     try {
       final response =
-          await http.get(Uri.parse('http://10.2.0.32:3001/problemas'));
+          await http.get(Uri.parse('http://localhost:3001/problemas'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
@@ -60,7 +60,7 @@ class _RegistrarProblemaExtintorPageState
   Future<void> _fetchStatus() async {
     try {
       final response =
-          await http.get(Uri.parse('http://10.2.0.32:3001/status'));
+          await http.get(Uri.parse('http://localhost:3001/status'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
@@ -97,13 +97,12 @@ class _RegistrarProblemaExtintorPageState
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.2.0.32:3001/registrar_problema'),
+        Uri.parse('http://localhost:3001/registrar_problema'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(problemaData),
       );
 
       if (response.statusCode == 200) {
-        // Atualiza o status do extintor
         await _atualizarStatusExtintor(patrimonio, _statusSelecionado);
 
         _showSuccessDialog('Problema registrado com sucesso!');
@@ -121,7 +120,7 @@ class _RegistrarProblemaExtintorPageState
       String patrimonio, String? statusSelecionado) async {
     try {
       final response = await http.put(
-        Uri.parse('http://10.2.0.32:3001/atualizar_status_extintor'),
+        Uri.parse('http://localhost:3001/atualizar_status_extintor'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "patrimonio": patrimonio,
@@ -194,7 +193,7 @@ class _RegistrarProblemaExtintorPageState
       backgroundColor: const Color(0xFFD9D9D9),
       appBar: AppBar(
         title: const Text("Registrar Problema no Extintor",
-        style: TextStyle(
+            style: TextStyle(
                 fontWeight: FontWeight.bold, color: Color(0xFFD9D9D9))),
         centerTitle: true,
         backgroundColor: const Color(0xFF011689),
@@ -220,10 +219,10 @@ class _RegistrarProblemaExtintorPageState
                   ),
                 ],
               ),
-              child: Column(
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Registrar Problema no Extintor',
                     style: TextStyle(
                       fontSize: 24,
@@ -231,8 +230,8 @@ class _RegistrarProblemaExtintorPageState
                       color: Color(0xFF011689),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  const Text(
+                  SizedBox(height: 10),
+                  Text(
                     'Preencha os campos abaixo para registrar um problema no extintor.',
                     style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),
@@ -261,14 +260,18 @@ class _RegistrarProblemaExtintorPageState
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _registrarProblema,
-                    child: const Text('Registrar Problema', style: TextStyle(color: Color(0xFFD9D9D9)),),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF011689),
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 45),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 45),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                       textStyle: const TextStyle(fontSize: 16),
+                    ),
+                    child: const Text(
+                      'Registrar Problema',
+                      style: TextStyle(color: Color(0xFFD9D9D9)),
                     ),
                   ),
                 ],
@@ -282,22 +285,11 @@ class _RegistrarProblemaExtintorPageState
             const SizedBox(height: 10),
             problemas.isEmpty
                 ? const Text('Nenhum problema registrado.')
-                : Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white, // Fundo branco
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.15),
-                          spreadRadius: 3,
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
+                : Column(
+                    children: problemas
+                        .map((problema) => _buildProblemCard(problema))
+                        .toList(),
                   )
-
           ],
         ),
       ),
@@ -320,7 +312,7 @@ class _RegistrarProblemaExtintorPageState
             ),
             const SizedBox(height: 8),
             Text(
-              'Problema: ${problema['Problema'] ?? 'Sem Problema'}',
+              'Problema: ${problema['Problemas'] ?? 'Sem Problema'}',
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 4),
@@ -335,7 +327,7 @@ class _RegistrarProblemaExtintorPageState
             ),
             const SizedBox(height: 4),
             Text(
-              'Status: ${problema['Status'] ?? 'Sem Status'}', // A chave 'Status' agora está correta
+              'Status: ${problema['Status'] ?? 'Sem Status'}',
               style: const TextStyle(fontSize: 16),
             ),
           ],
@@ -365,7 +357,7 @@ class _RegistrarProblemaExtintorPageState
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.black),
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
         filled: true,
         fillColor: Colors.white,
       ),
@@ -381,8 +373,7 @@ class _RegistrarProblemaExtintorPageState
           value: problema,
           child: Text(
             problema,
-            style: const TextStyle(
-                color: Colors.black), // Define a cor do texto como preto
+            style: const TextStyle(color: Colors.black),
           ),
         );
       }).toList(),
@@ -391,16 +382,15 @@ class _RegistrarProblemaExtintorPageState
           _problemaSelecionado = value;
         });
       },
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         labelText: 'Selecione o Problema',
-        labelStyle: const TextStyle(color: Colors.black),
+        labelStyle: TextStyle(color: Colors.black),
         border: OutlineInputBorder(),
         filled: true,
         fillColor: Colors.white,
       ),
     );
   }
-
 
   Widget _buildStatusDropdown() {
     return DropdownButtonFormField<String>(
@@ -410,8 +400,7 @@ class _RegistrarProblemaExtintorPageState
           value: status['nome'],
           child: Text(
             status['nome'],
-            style: const TextStyle(
-                color: Colors.black), // Define a cor do texto como preto
+            style: const TextStyle(color: Colors.black),
           ),
         );
       }).toList(),
@@ -420,9 +409,9 @@ class _RegistrarProblemaExtintorPageState
           _statusSelecionado = value;
         });
       },
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         labelText: 'Selecione o Status',
-        labelStyle: const TextStyle(color: Colors.black),
+        labelStyle: TextStyle(color: Colors.black),
         border: OutlineInputBorder(),
         filled: true,
         fillColor: Colors.white,
